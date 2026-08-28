@@ -3,7 +3,7 @@
 **Supersedes:** `trading-alerts-app-PRD-V2.md` (V2)
 **Build environment:** VS Code + Claude Code CLI
 **Host:** Netlify (Functions + Scheduled Functions + static frontend) + Neon Postgres (direct connection) + Netlify Identity
-**Status:** V2 scope is live and ~99% complete (OneSignal Web Push configured and repo pushed 2026-08-28; only a live OneSignal delivery check remains — §13). **V3 scope — Movers & Risk, Sector Breakdown, Position Calculator — is built, tested, migrated, and LIVE** at https://fx-stock-alerts.netlify.app (deployed 2026-08-28, 16 functions). Sector Breakdown shows empty until users add stock symbols (the daily cron then classifies them).
+**Status:** V2 scope is functionally complete — both notification channels verified on the live site, OneSignal Web Push configured + delivery-tested, repo pushed (all 2026-08-28). **V3 scope — Movers & Risk, Sector Breakdown, Position Calculator — is built, tested, migrated, and LIVE** at https://fx-stock-alerts.netlify.app (deployed 2026-08-28, 16 functions). Sector Breakdown shows empty until users add stock symbols (the daily cron then classifies them).
 **Last updated:** 2026-08-28
 
 ---
@@ -20,7 +20,7 @@
 | Auth + admin approval | ✅ Complete | Server-side gate on every endpoint; app_metadata mirrored to DB |
 | CRUD Functions (alerts, watchlist) | ✅ Complete | 12 functions deployed |
 | Telegram notifications | ✅ Complete & verified | Bot `@FxNStAlert_bot`, webhook registered + secret-verified |
-| OneSignal web push | ✅ Configured (2026-08-28) | Web Push platform set up & saved in the OneSignal dashboard (Typical Site, `https://fx-stock-alerts.netlify.app`, default SW). No code change. Live subscribe→deliver check still pending. |
+| OneSignal web push | ✅ Configured & verified end-to-end (2026-08-28) | Web Push platform saved in the dashboard (Typical Site, `https://fx-stock-alerts.netlify.app`, default SW). No code change. Live site: SDK inits clean, SW registers, browser subscribes, and a REST push with the exact `notify.js` payload was delivered/shown. |
 | Frontend (all pages) | ✅ Complete | Landing, pending, dashboard, watchlist, notifications, admin |
 | Deployment / infra | ✅ Complete | Site + DB + Identity live; env vars set; first admin bootstrapped |
 | Git repository | ✅ Committed & pushed (2026-08-28) | Root commit on `master` → `github.com/myplexlink-ops/frxNstkAlert` |
@@ -72,7 +72,7 @@ with `make_admin: true`, or `scripts/seed-admin.js` + Identity dashboard.
 | Price data — primary | Twelve Data | ✅ Same (`_lib/prices.js`, comma-batched, 8/call) | New usage: `/time_series` for charts (on click only) — extend `_lib/prices.js`, don't create a parallel client |
 | Price data — fallback | Finnhub (stocks only) | ✅ Same | Not extended to charts/sector — Twelve Data only for those |
 | Notifications — primary | Telegram Bot API | ✅ Same, verified working | No change |
-| Notifications — secondary | OneSignal Web Push | ✅ Web Push platform configured in the dashboard 2026-08-28 (§13); live delivery not yet user-verified | No change |
+| Notifications — secondary | OneSignal Web Push | ✅ Web Push platform configured + delivery-tested end-to-end on the live site 2026-08-28 (§13) | No change |
 
 Rejected in V1 and still not introduced: cron-job.org, Alpha Vantage, PushEngage.
 
@@ -115,7 +115,7 @@ calculator are built entirely on data that already exists.
 
 ### 6.1–6.5 (unchanged, as built)
 Twelve Data batched `/quote`, Finnhub stock-only fallback, Telegram `/sendMessage` +
-webhook linking, OneSignal `/notifications` (v16 SDK; Web Push platform configured 2026-08-28, live delivery unverified),
+webhook linking, OneSignal `/notifications` (v16 SDK; Web Push platform configured 2026-08-28 and a test push delivered to the live site end-to-end),
 Netlify Identity widget + `app_metadata` writeback — all unchanged by this revision. See
 V2 §6 for full detail.
 
@@ -220,7 +220,7 @@ change; no new endpoint (reuses `list-alerts`).
 1. New signup can't see dashboard until admin approves — ✅
 2. Two users, same symbol → one price API call per cycle — ✅
 3. One-time alert deactivates after firing; recurring re-arms correctly — ✅
-4. Telegram + OneSignal attempted independently, both logged — ✅ logic verified; OneSignal Web Push now configured, live delivery check pending (§13)
+4. Telegram + OneSignal attempted independently, both logged — ✅ both channels verified delivering on the live site (§13)
 5. Poll interval respected per-alert — ✅
 6. All endpoints reject unauthenticated/unapproved users — ✅
 
@@ -243,9 +243,11 @@ the new features reuse the existing `TWELVE_DATA_API_KEY`.
 ## 13. Known Open Items
 
 ### Carried forward from V2
-1. ✅ **OneSignal Web Push platform configured 2026-08-28** (dashboard, app `b06c8e23-…`,
-   Typical Site, `https://fx-stock-alerts.netlify.app`, default SW). No code change.
-   Remaining: one live subscribe→deliver check on the deployed site.
+1. ✅ **OneSignal Web Push configured & verified end-to-end 2026-08-28** (dashboard, app
+   `b06c8e23-…`, Typical Site, `https://fx-stock-alerts.netlify.app`, default SW). No code
+   change. Live site: SDK inits clean, SW registers, browser subscribes, and a REST push
+   with the exact `_lib/notify.js` payload was delivered/shown. Only the logged-in
+   `link-onesignal` → `poll-alerts` chain is unexercised (needs Identity login).
 2. ✅ **Repository committed & pushed 2026-08-28** → `github.com/myplexlink-ops/frxNstkAlert`
 3. Local dev needs `DATABASE_URL` in `.env` for `npm run dev` against a real DB
 4. `price_cache.asset_type` can flip if two alerts disagree on a symbol's type — low impact
@@ -291,7 +293,7 @@ SECRETS_SCAN_OMIT_PATHS     set
 ## 16. Remaining Work to "Done"
 
 ### Carried forward from V2
-1. ~~Configure the OneSignal Web Push platform~~ **done 2026-08-28** — still verify live push end-to-end
+1. ~~Configure the OneSignal Web Push platform / verify live push~~ **done & verified 2026-08-28**
 2. ~~`git commit` the initial codebase and push to a remote~~ **done 2026-08-28**
 3. Add `DATABASE_URL` to local `.env` for full local dev parity (optional)
 4. Optional hardening: pin `price_cache.asset_type` on first insert; admin view of recent `notification_log` rows
