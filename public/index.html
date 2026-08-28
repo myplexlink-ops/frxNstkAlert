@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trading Alerts</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%94%94%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🔔 Trading Alerts</div>
+    <nav id="nav" class="nav hidden">
+      <button data-view="dashboard" class="nav-btn active">Alerts</button>
+      <button data-view="watchlist" class="nav-btn">Watchlist</button>
+      <button data-view="movers-risk" class="nav-btn">Movers &amp; Risk</button>
+      <button data-view="sectors" class="nav-btn">Sectors</button>
+      <button data-view="calculator" class="nav-btn">Calculator</button>
+      <button data-view="notifications" class="nav-btn">Notifications</button>
+      <button data-view="admin" class="nav-btn hidden" id="nav-admin">Admin</button>
+    </nav>
+    <div class="topbar-right">
+      <span id="user-email" class="user-email"></span>
+      <button id="btn-login" class="btn btn-primary">Log in / Sign up</button>
+      <button id="btn-logout" class="btn btn-ghost hidden">Log out</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Logged out -->
+    <section id="view-landing" class="view">
+      <div class="card centered">
+        <h1>Forex &amp; Stock Price Alerts</h1>
+        <p>Set price-level and %-change alerts on forex pairs and stocks. Get pinged on
+           Telegram and browser push when a condition is met — checked
+           <strong id="landing-tick">every minute</strong>, whether or not this app is open.</p>
+        <p class="muted">This is polling-based (1–5 minutes per alert), not tick-level.</p>
+        <button id="btn-login-2" class="btn btn-primary btn-lg">Log in / Sign up</button>
+        <p class="muted small">New accounts need admin approval before creating alerts.</p>
+      </div>
+    </section>
+
+    <!-- Pending approval -->
+    <section id="view-pending" class="view hidden">
+      <div class="card centered">
+        <h1>Waiting for approval</h1>
+        <p>Your account <strong id="pending-email"></strong> has been created but needs an
+           administrator to approve it before you can create alerts.</p>
+        <p class="muted">Check back later, or ask your admin to approve you.</p>
+        <button id="btn-refresh-status" class="btn">Check again</button>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="view-dashboard" class="view hidden">
+      <div class="view-head">
+        <h1>Your alerts</h1>
+        <button id="btn-new-alert" class="btn btn-primary">+ New alert</button>
+      </div>
+      <p class="muted small">Engine wakes <span id="dash-tick">every minute</span>; each alert is
+        re-checked on its own interval.</p>
+      <div id="alerts-list" class="list"></div>
+      <p id="alerts-empty" class="muted hidden">No alerts yet. Create one to get started.</p>
+    </section>
+
+    <!-- Watchlist -->
+    <section id="view-watchlist" class="view hidden">
+      <div class="view-head"><h1>Watchlist</h1></div>
+      <form id="watch-form" class="inline-form">
+        <select id="watch-type">
+          <option value="forex">Forex</option>
+          <option value="stock">Stock</option>
+        </select>
+        <input id="watch-symbol" placeholder="EUR/USD or AAPL" autocomplete="off" />
+        <button class="btn btn-primary" type="submit">Add</button>
+      </form>
+      <div id="watch-list" class="list"></div>
+    </section>
+
+    <!-- Movers & Risk -->
+    <section id="view-movers-risk" class="view hidden">
+      <div class="view-head"><h1>Movers &amp; Risk</h1></div>
+      <p class="muted small">Read-only. Uses the last price the alert engine already fetched —
+        no extra market data calls. Click a symbol for a price chart.</p>
+
+      <div class="card">
+        <h2>Movers <span class="muted small">(your watchlist, by size of move)</span></h2>
+        <div id="movers-list" class="list"></div>
+        <p id="movers-empty" class="muted hidden">Nothing on your watchlist yet.</p>
+      </div>
+
+      <div class="card">
+        <h2>Risk <span class="muted small">(distance from last price to each active alert)</span></h2>
+        <div id="risk-list" class="list"></div>
+        <p id="risk-empty" class="muted hidden">No active alerts.</p>
+      </div>
+    </section>
+
+    <!-- Sector Breakdown -->
+    <section id="view-sectors" class="view hidden">
+      <div class="view-head"><h1>Sector Breakdown</h1></div>
+      <p class="muted small">Your <strong>stock</strong> watchlist grouped by sector. Forex is
+        excluded. Sector data refreshes daily; newly added symbols may show as “unclassified”
+        until the next refresh.</p>
+      <div id="sectors-summary" class="muted small"></div>
+      <div id="sectors-list" class="list"></div>
+      <p id="sectors-empty" class="muted hidden">No stocks on your watchlist yet.</p>
+    </section>
+
+    <!-- Position Calculator -->
+    <section id="view-calculator" class="view hidden">
+      <div class="view-head"><h1>Position Calculator</h1></div>
+      <p class="muted small">How many more shares to buy to move your average cost toward a
+        target. Nothing is saved — refreshing clears the form.</p>
+
+      <div class="card">
+        <form id="calc-form" class="calc-form">
+          <label>Symbol (optional — prefills buy price from last quote)
+            <input id="calc-symbol" list="calc-symbol-options" placeholder="AAPL" autocomplete="off" />
+            <datalist id="calc-symbol-options"></datalist>
+          </label>
+          <label>Shares currently owned
+            <input id="calc-shares" type="number" step="any" min="0" placeholder="100" />
+          </label>
+          <label>Current average cost
+            <input id="calc-avg" type="number" step="any" min="0" placeholder="150" />
+          </label>
+          <label>Target average cost
+            <input id="calc-target" type="number" step="any" min="0" placeholder="140" />
+          </label>
+          <label>Hypothetical buy price
+            <input id="calc-buy" type="number" step="any" min="0" placeholder="130" />
+          </label>
+          <div class="modal-actions">
+            <button type="button" id="calc-reset" class="btn btn-ghost">Reset</button>
+            <button type="submit" class="btn btn-primary">Calculate</button>
+          </div>
+        </form>
+        <p id="calc-error" class="error hidden"></p>
+        <div id="calc-result" class="calc-result hidden"></div>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section id="view-notifications" class="view hidden">
+      <div class="view-head"><h1>Notification channels</h1></div>
+
+      <div class="card">
+        <h2>Telegram</h2>
+        <p id="tg-status" class="status">…</p>
+        <ol id="tg-steps" class="steps">
+          <li>Open Telegram and find the bot <strong id="tg-botname">(your alert bot)</strong>.</li>
+          <li>Send this message to the bot:
+            <code id="tg-command" class="copybox">/start …</code>
+            <button id="tg-copy" class="btn btn-sm">Copy</button>
+          </li>
+          <li>You’ll get a confirmation reply here in the app after you refresh.</li>
+        </ol>
+        <button id="tg-regen" class="btn btn-sm btn-ghost">Generate a new code</button>
+      </div>
+
+      <div class="card">
+        <h2>Browser push (OneSignal)</h2>
+        <p id="os-status" class="status">…</p>
+        <button id="os-enable" class="btn btn-primary">Enable browser alerts</button>
+        <button id="os-disable" class="btn btn-ghost hidden">Disable</button>
+      </div>
+
+      <div class="card">
+        <h2>In-page sound</h2>
+        <p class="muted small">While this tab is open, a chime and a banner appear when one of
+          your alerts fires. Your alerts are checked here about every 45 seconds — this is a
+          convenience on top of Telegram / push, not a replacement (it only works with the tab open).</p>
+        <label class="checkbox">
+          <input id="snd-toggle" type="checkbox" checked />
+          Play a sound when an alert fires
+        </label>
+        <button id="snd-test" class="btn btn-sm">Test sound</button>
+      </div>
+    </section>
+
+    <!-- Admin -->
+    <section id="view-admin" class="view hidden">
+      <div class="view-head"><h1>Admin</h1></div>
+      <div class="card">
+        <h2>Pending signups (<span id="pending-count">0</span>)</h2>
+        <div id="pending-list" class="list"></div>
+        <p id="pending-empty" class="muted hidden">No pending users.</p>
+      </div>
+      <div class="card">
+        <h2>All users</h2>
+        <div id="users-list" class="list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Alert editor modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <h2 id="modal-title">New alert</h2>
+      <form id="alert-form">
+        <input type="hidden" id="alert-id" />
+        <label>Asset type
+          <select id="f-asset-type">
+            <option value="forex">Forex</option>
+            <option value="stock">Stock</option>
+          </select>
+        </label>
+        <label>Symbol
+          <input id="f-symbol" list="symbol-options" placeholder="EUR/USD or AAPL" autocomplete="off" required />
+          <datalist id="symbol-options"></datalist>
+        </label>
+        <label>Condition
+          <select id="f-condition">
+            <option value="cross_above">Price crosses above</option>
+            <option value="cross_below">Price crosses below</option>
+            <option value="pct_change">% change reaches</option>
+          </select>
+        </label>
+        <label id="l-target">Target value
+          <input id="f-target" type="number" step="any" required />
+        </label>
+        <label id="l-ref" class="hidden">Reference price (optional — blank = vs previous close)
+          <input id="f-ref" type="number" step="any" />
+        </label>
+        <label>Re-check interval: <span id="f-interval-label">1 min</span>
+          <input id="f-interval" type="range" min="1" max="5" step="1" value="1" />
+        </label>
+        <label class="checkbox">
+          <input id="f-recurring" type="checkbox" />
+          Recurring (re-arms after price crosses back; otherwise fires once)
+        </label>
+        <p id="form-error" class="error hidden"></p>
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel" class="btn btn-ghost">Cancel</button>
+          <button type="submit" id="btn-save" class="btn btn-primary">Save alert</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Ticker chart modal -->
+  <div id="chart-modal" class="modal hidden">
+    <div class="modal-box chart-box">
+      <div class="view-head">
+        <h2 id="chart-title">Chart</h2>
+        <button type="button" id="chart-close" class="btn btn-sm btn-ghost">Close</button>
+      </div>
+      <div class="chart-intervals" id="chart-intervals">
+        <button class="btn btn-sm" data-iv="1day">Daily</button>
+        <button class="btn btn-sm" data-iv="1week">Weekly</button>
+        <button class="btn btn-sm" data-iv="1h">Hourly</button>
+      </div>
+      <canvas id="chart-canvas" width="600" height="260"></canvas>
+      <p id="chart-status" class="muted small"></p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/config.js"></script>
+  <script src="/lib-calc.js"></script>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script src="/app.js" defer></script>
+</body>
+</html>

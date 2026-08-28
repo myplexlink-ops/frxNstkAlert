@@ -1,0 +1,22 @@
+{
+  "name": "trading-alerts-app",
+  "version": "1.0.0",
+  "description": "Multi-user Forex & Stock price alert app (Netlify Functions + Neon Postgres + Identity)",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "dev": "netlify dev",
+    "test": "node scripts/engine-test.js && node scripts/v3-test.js",
+    "test:engine": "node scripts/engine-test.js",
+    "test:v3": "node scripts/v3-test.js",
+    "db:seed-admin": "node scripts/seed-admin.js",
+    "set-telegram-webhook": "node scripts/set-telegram-webhook.js"
+  },
+  "dependencies": {
+    "@netlify/database": "^1.1.0",
+    "@netlify/functions": "^2.8.2"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.36.1"
+  }
+}

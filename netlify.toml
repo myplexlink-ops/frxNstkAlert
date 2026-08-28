@@ -1,0 +1,31 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["netlify/database/migrations/**"]
+
+# Alert engine — runs every minute. Each alert still respects its own
+# poll_interval_seconds (60–300); this cron is just the wake-up tick.
+[functions."poll-alerts"]
+  schedule = "* * * * *"
+
+# Sector/industry metadata refresh for the Sector Breakdown view — daily at 06:00 UTC.
+[functions."refresh-symbol-metadata"]
+  schedule = "0 6 * * *"
+
+[dev]
+  publish = "public"
+  port = 8888
+
+# SPA-ish fallback: unknown paths serve index.html so the client router works.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
