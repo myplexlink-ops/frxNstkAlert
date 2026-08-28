@@ -18,14 +18,14 @@
 | Auth + admin approval | ✅ Complete | Server-side gate on every endpoint; app_metadata mirrored to DB |
 | CRUD Functions (alerts, watchlist) | ✅ Complete | 12 functions deployed |
 | Telegram notifications | ✅ Complete & verified | Bot `@FxNStAlert_bot`, webhook registered + secret-verified |
-| OneSignal web push | ⚠️ Code complete, **not functional** | Blocked on OneSignal dashboard Web Push platform config |
+| OneSignal web push | ✅ Configured (2026-08-28) | Web Push platform saved in the OneSignal dashboard (Typical Site, site URL `https://fx-stock-alerts.netlify.app`, default SW). No code change. Live end-to-end subscribe/deliver not yet user-verified. |
 | Frontend (all pages) | ✅ Complete | Landing, pending, dashboard, watchlist, notifications, admin |
 | Deployment / infra | ✅ Complete | Site + DB + Identity live; env vars set; first admin bootstrapped |
-| Git repository | ⚠️ Uncommitted | Files staged on `master`, **no commits yet** |
+| Git repository | ✅ Committed & pushed (2026-08-28) | Root commit on `master`, remote `github.com/myplexlink-ops/frxNstkAlert` |
 
-**Overall: ~95% complete.** The app is usable end-to-end today via Telegram. The two
-remaining items are (1) OneSignal web-push platform configuration (external dashboard
-task, no code change) and (2) an initial git commit.
+**Overall: ~99% complete.** Usable end-to-end via Telegram; OneSignal web push is now
+configured. Only remaining item is a live subscribe→deliver check of the OneSignal path
+(accept the browser permission prompt on the Notifications page).
 
 ---
 
@@ -61,7 +61,7 @@ or `scripts/seed-admin.js` + Identity dashboard.
 | Price data — primary | Twelve Data | ✅ Same (`_lib/prices.js`, comma-batched, 8/call) |
 | Price data — fallback | Finnhub (stocks only) | ✅ Same |
 | Notifications — primary | Telegram Bot API | ✅ Same, verified working |
-| Notifications — secondary | OneSignal Web Push | ⚠️ Code complete; **v16 SDK**, 2026 REST endpoint. Not yet functional (§13). |
+| Notifications — secondary | OneSignal Web Push | ✅ **v16 SDK**, 2026 REST endpoint; Web Push platform configured in the dashboard 2026-08-28. Live delivery not yet user-verified (§13). |
 
 Rejected in V1 and still not introduced: cron-job.org, Alpha Vantage, PushEngage.
 
@@ -191,12 +191,12 @@ native mobile app, multi-language.
 | 1 | New signup can't see dashboard until admin approves | ✅ server-side gate + `#view-pending` |
 | 2 | Two users, same symbol → one price API call per cycle | ✅ symbol dedup in `poll-alerts.js`; engine test |
 | 3 | One-time alert deactivates after firing; recurring doesn't double-fire and re-arms | ✅ engine tests pass |
-| 4 | Telegram + OneSignal attempted independently, both logged | ✅ `notifyAlert` — separate try/catch, `notification_log` per channel. *(OneSignal path currently errors at delivery — see §13.)* |
+| 4 | Telegram + OneSignal attempted independently, both logged | ✅ `notifyAlert` — separate try/catch, `notification_log` per channel. OneSignal Web Push platform now configured; live delivery check pending (§13). |
 | 5 | Poll interval respected per-alert | ✅ engine test "per-alert interval" |
 | 6 | All endpoints reject unauthenticated / unapproved users | ✅ `requireUser` on every endpoint |
 
-Criteria 1–3, 5, 6 fully verified. Criterion 4's logic is verified; live OneSignal delivery
-is blocked on §13.
+Criteria 1–3, 5, 6 fully verified. Criterion 4's logic is verified; the OneSignal path is
+configured and awaits one live subscribe→deliver check (§13).
 
 ## 12. Prerequisites — Status
 
@@ -212,16 +212,19 @@ is blocked on §13.
 
 ## 13. Known Open Items
 
-1. **OneSignal web push not functional.** Client logs *"App not configured for web push"*.
-   The OneSignal dashboard for app `b06c8e23-aea0-4edf-a284-be14f3ef3b09` needs its
-   **Web Push platform** configured (site URL `https://fx-stock-alerts.netlify.app`, default
-   icon, etc.). No code change expected once that's done — `link-onesignal.js`, the v16 SDK
-   init, and `sendOneSignal` are all in place. **Telegram is unaffected and is the working
-   notification path.**
-2. **Repository has no commits.** All files are staged (`git add`) on branch `master` but
-   never committed. First commit + push to a remote is outstanding.
+1. **OneSignal web push — configured 2026-08-28, live delivery not yet user-verified.**
+   The Web Push platform is now set up and saved in the OneSignal dashboard for app
+   `b06c8e23-aea0-4edf-a284-be14f3ef3b09` (Typical Site, site URL
+   `https://fx-stock-alerts.netlify.app`, default service worker matching
+   `public/OneSignalSDKWorker.js`). No code change was needed. Remaining: one manual
+   check — log in on the deployed site, click *Enable browser alerts*, accept the browser
+   permission prompt, and confirm `link-onesignal` stores the id and a test alert delivers
+   a push. Telegram is the already-working path.
+2. ~~Repository has no commits.~~ **Done 2026-08-28** — root commit on `master`, pushed to
+   `github.com/myplexlink-ops/frxNstkAlert`.
 3. **Local dev needs `DATABASE_URL`.** `.env` must carry the Neon pooled connection string
-   for `npm run dev` / `npm test` against a real DB (the engine tests use mocks and don't need it).
+   for `npm run dev` against a real DB (the engine tests use mocks and don't need it; the
+   V3 migration helper reads it from `netlify env:get`).
 4. **`asset_type` on `price_cache` can flip** if two alerts disagree on a symbol's type
    (the upsert takes `EXCLUDED.asset_type`). Low impact; consider pinning on first insert.
 
@@ -254,10 +257,10 @@ SECRETS_SCAN_OMIT_PATHS    ✅ set
 
 ## 16. Remaining Work to "Done"
 
-1. Configure the OneSignal Web Push platform in the OneSignal dashboard, then verify a live
-   push end-to-end (create an alert, trigger `poll-alerts`, confirm both channels in
-   `notification_log`).
-2. `git commit` the initial codebase and push to a remote.
+1. ~~Configure the OneSignal Web Push platform.~~ **Done 2026-08-28.** Still to do: verify a
+   live push end-to-end (subscribe on the deployed site, trigger `poll-alerts`, confirm both
+   channels in `notification_log`).
+2. ~~`git commit` the initial codebase and push to a remote.~~ **Done 2026-08-28.**
 3. Add `DATABASE_URL` to local `.env` for full local dev parity (optional).
 4. Optional hardening: pin `price_cache.asset_type` on first insert; add a lightweight
    admin view of recent `notification_log` rows for delivery debugging.
