@@ -5,7 +5,7 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "dev": "netlify dev",
+    "dev": "node scripts/dev.js",
     "test": "node scripts/engine-test.js && node scripts/v3-test.js",
     "test:engine": "node scripts/engine-test.js",
     "test:v3": "node scripts/v3-test.js",

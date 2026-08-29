@@ -3,236 +3,401 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Trading Alerts</title>
+  <title>The Alert Desk</title>
   <link rel="stylesheet" href="/styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%94%94%3C/text%3E%3C/svg%3E" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">🔔 Trading Alerts</div>
-    <nav id="nav" class="nav hidden">
-      <button data-view="dashboard" class="nav-btn active">Alerts</button>
-      <button data-view="watchlist" class="nav-btn">Watchlist</button>
-      <button data-view="movers-risk" class="nav-btn">Movers &amp; Risk</button>
-      <button data-view="sectors" class="nav-btn">Sectors</button>
-      <button data-view="calculator" class="nav-btn">Calculator</button>
-      <button data-view="notifications" class="nav-btn">Notifications</button>
-      <button data-view="admin" class="nav-btn hidden" id="nav-admin">Admin</button>
-    </nav>
-    <div class="topbar-right">
-      <span id="user-email" class="user-email"></span>
-      <button id="btn-login" class="btn btn-primary">Log in / Sign up</button>
-      <button id="btn-logout" class="btn btn-ghost hidden">Log out</button>
+  <header class="masthead">
+    <div class="masthead-meta">
+      <span id="today-date"></span>
+      <span class="live"><span class="live-dot"></span> Engine live · polled <span id="dash-tick">every minute</span></span>
+      <span class="user-side">
+        <span id="user-email" class="user-email"></span>
+        <button id="btn-login" class="btn btn-primary btn-sm">Log in / Sign up</button>
+        <button id="btn-logout" class="btn btn-ghost hidden">Log out</button>
+      </span>
     </div>
+    <div class="rule-thick"></div>
+    <div class="rule-thin"></div>
+
+    <div class="masthead-title">
+      <h1>The Alert Desk</h1>
+      <p class="standfirst">Forex &amp; equity price alerts, delivered to Telegram and browser push whether or not this page is open.</p>
+      <button id="btn-new-alert" class="btn btn-primary hidden"><span aria-hidden="true">&#128276;</span> New alert</button>
+    </div>
+    <div class="rule-thin"></div>
+
+    <nav id="nav" class="tabs hidden">
+      <button data-view="desk" class="tab-btn active">Front page</button>
+      <button data-view="alerts" class="tab-btn">Alerts</button>
+      <button data-view="watchlist" class="tab-btn">Watchlist</button>
+      <button data-view="market" class="tab-btn">Market</button>
+      <button data-view="calculator" class="tab-btn">Calculator</button>
+      <button data-view="delivery" class="tab-btn">Delivery</button>
+      <button data-view="admin" class="tab-btn hidden" id="nav-admin">Admin</button>
+    </nav>
+    <div class="rule-divider"></div>
   </header>
 
   <main id="main">
     <!-- Logged out -->
     <section id="view-landing" class="view">
-      <div class="card centered">
-        <h1>Forex &amp; Stock Price Alerts</h1>
-        <p>Set price-level and %-change alerts on forex pairs and stocks. Get pinged on
-           Telegram and browser push when a condition is met — checked
-           <strong id="landing-tick">every minute</strong>, whether or not this app is open.</p>
-        <p class="muted">This is polling-based (1–5 minutes per alert), not tick-level.</p>
-        <button id="btn-login-2" class="btn btn-primary btn-lg">Log in / Sign up</button>
-        <p class="muted small">New accounts need admin approval before creating alerts.</p>
+      <div class="entry-card">
+        <div class="rule-thick"></div>
+        <div class="rule-thin"></div>
+        <h1>The Alert Desk</h1>
+        <p>Price-level and %-change alerts on forex pairs and equities, checked <strong id="landing-tick">every minute</strong> and delivered to Telegram and browser push — open tab or not.</p>
+        <p class="muted small">Polling-based, 1–5 minutes per alert. Not tick-level.</p>
+        <div class="actions">
+          <button id="btn-login-2" class="btn btn-primary btn-lg">Log in</button>
+          <button id="btn-signup-2" class="btn btn-secondary btn-lg">Sign up</button>
+        </div>
+        <p class="muted small">New accounts need an administrator's approval before alerts can be created.</p>
       </div>
     </section>
 
     <!-- Pending approval -->
     <section id="view-pending" class="view hidden">
-      <div class="card centered">
-        <h1>Waiting for approval</h1>
-        <p>Your account <strong id="pending-email"></strong> has been created but needs an
-           administrator to approve it before you can create alerts.</p>
-        <p class="muted">Check back later, or ask your admin to approve you.</p>
-        <button id="btn-refresh-status" class="btn">Check again</button>
+      <div class="entry-card">
+        <div class="rule-thick"></div>
+        <div class="rule-thin"></div>
+        <h1>Your seat is being approved</h1>
+        <p><strong id="pending-email"></strong> exists but has no access yet. An administrator has to approve the account before it can hold a watchlist or alerts.</p>
+        <div class="actions">
+          <button id="btn-refresh-status" class="btn btn-primary">Check again</button>
+          <button id="btn-logout-2" class="btn btn-ghost">Log out</button>
+        </div>
+        <p class="muted small">Nothing else on the desk is reachable — every endpoint refuses an unapproved account, not just this screen.</p>
       </div>
     </section>
 
-    <!-- Dashboard -->
-    <section id="view-dashboard" class="view hidden">
-      <div class="view-head">
-        <h1>Your alerts</h1>
-        <button id="btn-new-alert" class="btn btn-primary">+ New alert</button>
+    <!-- Front page -->
+    <section id="view-desk" class="view hidden">
+      <div class="grid-desk">
+        <div>
+          <p class="kicker">Closest to firing</p>
+          <h2 id="desk-headline" style="max-width: 15ch;">Nothing armed yet</h2>
+          <p id="desk-standfirst" class="muted" style="max-width: 52ch;">Add a watchlist symbol and create an alert to see it here.</p>
+
+          <table class="table" style="margin-top: 26px">
+            <thead>
+              <tr>
+                <th style="width: 22%">Symbol</th>
+                <th>Condition</th>
+                <th class="num">Last</th>
+                <th class="num">Target</th>
+                <th style="width: 26%">Distance</th>
+              </tr>
+            </thead>
+            <tbody id="desk-near-body"></tbody>
+          </table>
+          <p id="desk-near-empty" class="muted small hidden">No armed alerts have a cached price yet.</p>
+          <p class="muted small" style="margin-top: 10px">Distance bar fills as the last polled price approaches the target. Prices are the engine's own cache — opening this page costs no market-data credits.</p>
+
+          <div class="rule-divider" style="margin: 34px 0 26px"></div>
+
+          <h3>Movers on your watchlist</h3>
+          <div id="desk-movers" class="movers-grid"></div>
+          <p id="desk-movers-empty" class="muted small hidden">Nothing on your watchlist yet.</p>
+        </div>
+
+        <aside class="block">
+          <div class="block">
+            <h4>Engine</h4>
+            <div class="rule-thin hairline"></div>
+            <dl>
+              <dt>Active alerts</dt><dd id="desk-active-count">0</dd>
+              <dt>Symbols polled</dt><dd id="desk-symbol-count">0</dd>
+            </dl>
+            <p class="muted small">Polling, not tick-level: each alert is re-checked on its own 1–5 minute interval.</p>
+          </div>
+
+          <div class="block">
+            <h4>Fired recently</h4>
+            <div class="rule-thin hairline"></div>
+            <ul id="desk-fired" class="fire-list"></ul>
+            <p id="desk-fired-empty" class="muted small hidden">Nothing has fired yet.</p>
+          </div>
+
+          <div class="block">
+            <h4>Delivery</h4>
+            <div class="rule-thin hairline"></div>
+            <ul class="delivery-mini">
+              <li><span>Telegram</span><span id="desk-tg-status">…</span></li>
+              <li><span>Browser push</span><span id="desk-os-status">…</span></li>
+              <li><span>In-page chime</span><span id="desk-sound-status">…</span></li>
+            </ul>
+            <button class="btn btn-secondary btn-block" data-goto="delivery">Manage delivery</button>
+          </div>
+        </aside>
       </div>
-      <p class="muted small">Engine wakes <span id="dash-tick">every minute</span>; each alert is
-        re-checked on its own interval.</p>
-      <div id="alerts-list" class="list"></div>
-      <p id="alerts-empty" class="muted hidden">No alerts yet. Create one to get started.</p>
+    </section>
+
+    <!-- Alerts -->
+    <section id="view-alerts" class="view hidden">
+      <div class="view-head">
+        <div>
+          <h2>Your alerts</h2>
+          <p class="muted small">One-time alerts deactivate after firing; recurring alerts re-arm once the price crosses back through the level.</p>
+        </div>
+      </div>
+      <table class="table" style="margin-top: 18px">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Condition</th>
+            <th class="num">Target</th>
+            <th class="num">Last price</th>
+            <th>Every</th>
+            <th>Mode</th>
+            <th>State</th>
+            <th class="num">·</th>
+          </tr>
+        </thead>
+        <tbody id="alerts-list"></tbody>
+      </table>
+      <p id="alerts-empty" class="muted hidden" style="margin-top: 24px">No alerts yet. Create one to get started.</p>
     </section>
 
     <!-- Watchlist -->
     <section id="view-watchlist" class="view hidden">
-      <div class="view-head"><h1>Watchlist</h1></div>
-      <form id="watch-form" class="inline-form">
-        <select id="watch-type">
-          <option value="forex">Forex</option>
-          <option value="stock">Stock</option>
-        </select>
-        <input id="watch-symbol" placeholder="EUR/USD or AAPL" autocomplete="off" />
-        <button class="btn btn-primary" type="submit">Add</button>
-      </form>
-      <div id="watch-list" class="list"></div>
+      <div class="grid-watch">
+        <div>
+          <h2>Watchlist</h2>
+          <p class="muted" style="max-width: 60ch">Symbols here feed the movers table, the sector breakdown and the calculator's price prefill. Adding a symbol does not create an alert.</p>
+          <table class="table" style="margin-top: 22px">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th class="num">Last polled</th>
+                <th class="num">·</th>
+              </tr>
+            </thead>
+            <tbody id="watch-list"></tbody>
+          </table>
+          <div id="watch-quickadd"></div>
+        </div>
+        <aside>
+          <h4>Add a symbol</h4>
+          <div class="rule-thin hairline"></div>
+          <form id="watch-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px">
+            <div class="field">
+              <label>Asset type</label>
+              <div class="seg">
+                <label class="seg-opt"><input type="radio" name="wtype" value="forex" checked />Forex</label>
+                <label class="seg-opt"><input type="radio" name="wtype" value="stock" />Stock</label>
+              </div>
+            </div>
+            <div class="field">
+              <label>Symbol</label>
+              <input id="watch-symbol" class="input" placeholder="EUR/USD or AAPL" autocomplete="off" />
+            </div>
+            <button class="btn btn-primary btn-block" type="submit">Add to watchlist</button>
+          </form>
+          <p class="muted small" style="margin-top: 14px">Forex uses slash notation (EUR/USD). Equities use the plain ticker. A new equity is classified into a sector at the next daily refresh.</p>
+        </aside>
+      </div>
     </section>
 
-    <!-- Movers & Risk -->
-    <section id="view-movers-risk" class="view hidden">
-      <div class="view-head"><h1>Movers &amp; Risk</h1></div>
-      <p class="muted small">Read-only. Uses the last price the alert engine already fetched —
-        no extra market data calls. Click a symbol for a price chart.</p>
+    <!-- Market (movers + risk + sectors) -->
+    <section id="view-market" class="view hidden">
+      <h2>Market</h2>
+      <p class="muted" style="max-width: 66ch">Read-only context on your own watchlist, built from prices the alert engine already fetched. Click any ticker for its price history.</p>
 
-      <div class="card">
-        <h2>Movers <span class="muted small">(your watchlist, by size of move)</span></h2>
-        <div id="movers-list" class="list"></div>
-        <p id="movers-empty" class="muted hidden">Nothing on your watchlist yet.</p>
+      <div class="grid-2" style="margin-top: 30px">
+        <section>
+          <h3>Movers</h3>
+          <p class="muted small">Ranked by size of move; unpriced symbols last.</p>
+          <table class="table">
+            <thead><tr><th>Symbol</th><th class="num">Last</th><th class="num">Change</th></tr></thead>
+            <tbody id="movers-list"></tbody>
+          </table>
+          <p id="movers-empty" class="muted hidden">Nothing on your watchlist yet.</p>
+        </section>
+
+        <section>
+          <h3>Risk</h3>
+          <p class="muted small">Signed distance from the last price to each active alert's target.</p>
+          <ul id="risk-list" style="list-style: none; margin: 0; padding: 0;"></ul>
+          <p id="risk-empty" class="muted hidden">No active alerts.</p>
+        </section>
       </div>
 
-      <div class="card">
-        <h2>Risk <span class="muted small">(distance from last price to each active alert)</span></h2>
-        <div id="risk-list" class="list"></div>
-        <p id="risk-empty" class="muted hidden">No active alerts.</p>
-      </div>
-    </section>
+      <div class="rule-divider" style="margin: 40px 0 30px"></div>
 
-    <!-- Sector Breakdown -->
-    <section id="view-sectors" class="view hidden">
-      <div class="view-head"><h1>Sector Breakdown</h1></div>
-      <p class="muted small">Your <strong>stock</strong> watchlist grouped by sector. Forex is
-        excluded. Sector data refreshes daily; newly added symbols may show as “unclassified”
-        until the next refresh.</p>
-      <div id="sectors-summary" class="muted small"></div>
-      <div id="sectors-list" class="list"></div>
-      <p id="sectors-empty" class="muted hidden">No stocks on your watchlist yet.</p>
+      <section>
+        <h3>Sector breakdown</h3>
+        <p id="sectors-summary" class="muted small">Equity watchlist only — forex is excluded.</p>
+        <div id="sectors-list" style="margin-top: 20px"></div>
+        <p id="sectors-empty" class="muted hidden">No stocks on your watchlist yet.</p>
+      </section>
     </section>
 
     <!-- Position Calculator -->
     <section id="view-calculator" class="view hidden">
-      <div class="view-head"><h1>Position Calculator</h1></div>
-      <p class="muted small">How many more shares to buy to move your average cost toward a
-        target. Nothing is saved — refreshing clears the form.</p>
+      <h2>Position calculator</h2>
+      <p class="muted" style="max-width: 64ch">How many more shares to buy so the blended average cost lands on a target. Stateless — nothing here is saved, and no position is tracked.</p>
 
-      <div class="card">
-        <form id="calc-form" class="calc-form">
-          <label>Symbol (optional — prefills buy price from last quote)
-            <input id="calc-symbol" list="calc-symbol-options" placeholder="AAPL" autocomplete="off" />
+      <div class="grid-calc" style="margin-top: 30px">
+        <form id="calc-form" style="display: flex; flex-direction: column; gap: 14px">
+          <div class="field">
+            <label>Symbol — optional, prefills the buy price</label>
+            <input id="calc-symbol" class="input" list="calc-symbol-options" placeholder="AAPL" autocomplete="off" />
             <datalist id="calc-symbol-options"></datalist>
-          </label>
-          <label>Shares currently owned
-            <input id="calc-shares" type="number" step="any" min="0" placeholder="100" />
-          </label>
-          <label>Current average cost
-            <input id="calc-avg" type="number" step="any" min="0" placeholder="150" />
-          </label>
-          <label>Target average cost
-            <input id="calc-target" type="number" step="any" min="0" placeholder="140" />
-          </label>
-          <label>Hypothetical buy price
-            <input id="calc-buy" type="number" step="any" min="0" placeholder="130" />
-          </label>
-          <div class="modal-actions">
-            <button type="button" id="calc-reset" class="btn btn-ghost">Reset</button>
+          </div>
+          <div class="field">
+            <label>Shares currently owned</label>
+            <input id="calc-shares" class="input" type="number" step="any" min="0" placeholder="100" />
+          </div>
+          <div class="field">
+            <label>Current average cost</label>
+            <input id="calc-avg" class="input" type="number" step="any" min="0" placeholder="150" />
+          </div>
+          <div class="field">
+            <label>Target average cost</label>
+            <input id="calc-target" class="input" type="number" step="any" min="0" placeholder="140" />
+          </div>
+          <div class="field">
+            <label>Hypothetical buy price</label>
+            <input id="calc-buy" class="input" type="number" step="any" min="0" placeholder="130" />
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px">
+            <button type="button" id="calc-reset" class="btn btn-secondary">Reset</button>
             <button type="submit" class="btn btn-primary">Calculate</button>
           </div>
         </form>
-        <p id="calc-error" class="error hidden"></p>
-        <div id="calc-result" class="calc-result hidden"></div>
+
+        <div>
+          <p id="calc-error" class="error hidden"></p>
+          <div id="calc-result" class="hidden"></div>
+          <p id="calc-idle" class="muted" style="max-width: 40ch">Fill the four figures and calculate. The solve is <em>n = shares &times; (avg &minus; target) &divide; (target &minus; buy)</em>.</p>
+        </div>
       </div>
     </section>
 
-    <!-- Notifications -->
-    <section id="view-notifications" class="view hidden">
-      <div class="view-head"><h1>Notification channels</h1></div>
+    <!-- Delivery -->
+    <section id="view-delivery" class="view hidden">
+      <h2>Delivery</h2>
+      <p class="muted" style="max-width: 64ch">Every channel is attempted independently, so one failing never suppresses the other.</p>
 
-      <div class="card">
-        <h2>Telegram</h2>
-        <p id="tg-status" class="status">…</p>
-        <ol id="tg-steps" class="steps">
-          <li>Open Telegram and find the bot <strong id="tg-botname">(your alert bot)</strong>.</li>
-          <li>Send this message to the bot:
-            <code id="tg-command" class="copybox">/start …</code>
-            <button id="tg-copy" class="btn btn-sm">Copy</button>
-          </li>
-          <li>You’ll get a confirmation reply here in the app after you refresh.</li>
-        </ol>
-        <button id="tg-regen" class="btn btn-sm btn-ghost">Generate a new code</button>
-      </div>
+      <div class="delivery-grid" style="margin-top: 32px">
+        <section>
+          <div style="display: flex; align-items: baseline; gap: 12px">
+            <h3 style="margin: 0">Telegram</h3>
+            <span id="tg-status" class="tag tag-neutral">…</span>
+          </div>
+          <div class="rule-thin hairline" style="margin: 10px 0 14px"></div>
+          <ol id="tg-steps" style="font-size: 14px; padding-left: 20px; color: var(--color-neutral-800); display: flex; flex-direction: column; gap: 6px">
+            <li>Open <strong id="tg-botname">the alert bot</strong> in Telegram.</li>
+            <li>Send the one-time code below.</li>
+            <li>The bot confirms; this page updates on refresh.</li>
+          </ol>
+          <div style="display: flex; gap: 10px; align-items: center; margin-top: 12px">
+            <code id="tg-command" style="background: var(--color-surface); border: 1px solid var(--color-divider); padding: 8px 12px; font-size: 14px; flex: 1">/start …</code>
+            <button id="tg-copy" class="btn btn-secondary">Copy</button>
+          </div>
+          <button id="tg-regen" class="btn btn-ghost" style="margin-top: 10px; align-self: flex-start">Generate a new code</button>
+        </section>
 
-      <div class="card">
-        <h2>Browser push (OneSignal)</h2>
-        <p id="os-status" class="status">…</p>
-        <button id="os-enable" class="btn btn-primary">Enable browser alerts</button>
-        <button id="os-disable" class="btn btn-ghost hidden">Disable</button>
-      </div>
+        <section>
+          <div style="display: flex; align-items: baseline; gap: 12px">
+            <h3 style="margin: 0">Browser push</h3>
+            <span id="os-status" class="tag tag-neutral">…</span>
+          </div>
+          <div class="rule-thin hairline" style="margin: 10px 0 14px"></div>
+          <p style="font-size: 14px; color: var(--color-neutral-800)">This browser is subscribed and will receive alerts with the tab closed. Push needs an https origin and a granted permission — a blocked permission shows here as "not subscribed".</p>
+          <div style="display: flex; gap: 10px">
+            <button id="os-enable" class="btn btn-primary">Enable browser alerts</button>
+            <button id="os-disable" class="btn btn-ghost hidden">Disable</button>
+          </div>
+        </section>
 
-      <div class="card">
-        <h2>In-page sound</h2>
-        <p class="muted small">While this tab is open, a chime and a banner appear when one of
-          your alerts fires. Your alerts are checked here about every 45 seconds — this is a
-          convenience on top of Telegram / push, not a replacement (it only works with the tab open).</p>
-        <label class="checkbox">
-          <input id="snd-toggle" type="checkbox" checked />
-          Play a sound when an alert fires
-        </label>
-        <button id="snd-test" class="btn btn-sm">Test sound</button>
+        <section>
+          <div style="display: flex; align-items: baseline; gap: 12px">
+            <h3 style="margin: 0">In-page chime</h3>
+            <span id="snd-status-tag" class="tag tag-neutral">On</span>
+          </div>
+          <div class="rule-thin hairline" style="margin: 10px 0 14px"></div>
+          <p style="font-size: 14px; color: var(--color-neutral-800)">A convenience on top of the real channels: while this tab is open your alerts are re-read about every 45 seconds and a two-tone chime plays on a fresh trigger. It cannot fire with the tab closed.</p>
+          <label class="checkbox">
+            <input id="snd-toggle" type="checkbox" checked />
+            Play a sound when an alert fires
+          </label>
+          <div>
+            <button id="snd-test" class="btn btn-secondary">Test chime</button>
+          </div>
+        </section>
       </div>
     </section>
 
     <!-- Admin -->
     <section id="view-admin" class="view hidden">
-      <div class="view-head"><h1>Admin</h1></div>
-      <div class="card">
-        <h2>Pending signups (<span id="pending-count">0</span>)</h2>
-        <div id="pending-list" class="list"></div>
-        <p id="pending-empty" class="muted hidden">No pending users.</p>
-      </div>
-      <div class="card">
-        <h2>All users</h2>
-        <div id="users-list" class="list"></div>
-      </div>
+      <h2>Admin</h2>
+      <p class="muted" style="max-width: 64ch">New accounts can log in but see nothing until approved here. Approval is mirrored to the identity record and the database row.</p>
+
+      <h3 style="margin: 32px 0 10px">Awaiting approval <span id="pending-count" style="color: var(--color-accent-2)">0</span></h3>
+      <table class="table" style="max-width: 900px">
+        <thead><tr><th>Email</th><th>Signed up</th><th class="num">·</th></tr></thead>
+        <tbody id="pending-list"></tbody>
+      </table>
+      <p id="pending-empty" class="muted hidden">No one is waiting.</p>
+
+      <h3 style="margin: 40px 0 10px">All users</h3>
+      <table class="table" style="max-width: 900px">
+        <thead><tr><th>Email</th><th>Role</th><th class="num">Alerts</th><th>Channels</th></tr></thead>
+        <tbody id="users-list"></tbody>
+      </table>
     </section>
   </main>
 
   <!-- Alert editor modal -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-box">
-      <h2 id="modal-title">New alert</h2>
-      <form id="alert-form">
+  <div id="modal" class="dialog-backdrop hidden">
+    <div class="dialog">
+      <div class="rule-thin hairline" style="background: var(--color-text); height: 3px"></div>
+      <h3 id="modal-title" style="margin: 4px 0 0">New alert</h3>
+      <form id="alert-form" style="display: flex; flex-direction: column; gap: 14px">
         <input type="hidden" id="alert-id" />
-        <label>Asset type
-          <select id="f-asset-type">
-            <option value="forex">Forex</option>
-            <option value="stock">Stock</option>
-          </select>
-        </label>
-        <label>Symbol
-          <input id="f-symbol" list="symbol-options" placeholder="EUR/USD or AAPL" autocomplete="off" required />
+        <div class="field">
+          <label>Asset type</label>
+          <div class="seg">
+            <label class="seg-opt"><input type="radio" name="atype" value="forex" checked />Forex</label>
+            <label class="seg-opt"><input type="radio" name="atype" value="stock" />Stock</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Symbol</label>
+          <input id="f-symbol" class="input" list="symbol-options" placeholder="EUR/USD or AAPL" autocomplete="off" required />
           <datalist id="symbol-options"></datalist>
-        </label>
-        <label>Condition
-          <select id="f-condition">
+        </div>
+        <div class="field">
+          <label>Condition</label>
+          <select id="f-condition" class="input">
             <option value="cross_above">Price crosses above</option>
             <option value="cross_below">Price crosses below</option>
             <option value="pct_change">% change reaches</option>
           </select>
-        </label>
-        <label id="l-target">Target value
-          <input id="f-target" type="number" step="any" required />
-        </label>
-        <label id="l-ref" class="hidden">Reference price (optional — blank = vs previous close)
-          <input id="f-ref" type="number" step="any" />
-        </label>
-        <label>Re-check interval: <span id="f-interval-label">1 min</span>
-          <input id="f-interval" type="range" min="1" max="5" step="1" value="1" />
-        </label>
+        </div>
+        <div class="field" id="l-target">
+          <label>Target value</label>
+          <input id="f-target" class="input" type="number" step="any" required />
+        </div>
+        <div class="field hidden" id="l-ref">
+          <label>Reference price — blank compares against the previous close</label>
+          <input id="f-ref" class="input" type="number" step="any" />
+        </div>
+        <div class="field">
+          <label>Re-check interval — <span id="f-interval-label">1 min</span></label>
+          <input id="f-interval" type="range" min="1" max="5" step="1" value="1" style="width: 100%; accent-color: var(--color-accent)" />
+        </div>
         <label class="checkbox">
-          <input id="f-recurring" type="checkbox" />
-          Recurring (re-arms after price crosses back; otherwise fires once)
+          <input id="f-recurring" type="checkbox" style="accent-color: var(--color-accent)" />
+          Recurring — re-arms after the price crosses back through the level
         </label>
         <p id="form-error" class="error hidden"></p>
-        <div class="modal-actions">
-          <button type="button" id="btn-cancel" class="btn btn-ghost">Cancel</button>
+        <div class="dialog-actions">
+          <button type="button" id="btn-cancel" class="btn btn-secondary">Cancel</button>
           <button type="submit" id="btn-save" class="btn btn-primary">Save alert</button>
         </div>
       </form>
@@ -240,19 +405,23 @@
   </div>
 
   <!-- Ticker chart modal -->
-  <div id="chart-modal" class="modal hidden">
-    <div class="modal-box chart-box">
-      <div class="view-head">
-        <h2 id="chart-title">Chart</h2>
-        <button type="button" id="chart-close" class="btn btn-sm btn-ghost">Close</button>
+  <div id="chart-modal" class="dialog-backdrop hidden">
+    <div class="dialog wide">
+      <div style="display: flex; align-items: baseline; gap: 16px">
+        <h3 id="chart-title" style="margin: 0">Chart</h3>
+        <span id="chart-status" class="muted small"></span>
+        <button type="button" id="chart-close" class="btn btn-ghost" style="margin-left: auto">Close</button>
       </div>
-      <div class="chart-intervals" id="chart-intervals">
-        <button class="btn btn-sm" data-iv="1day">Daily</button>
-        <button class="btn btn-sm" data-iv="1week">Weekly</button>
-        <button class="btn btn-sm" data-iv="1h">Hourly</button>
+      <div class="rule-thin hairline"></div>
+      <div class="seg" id="chart-intervals" style="align-self: flex-start">
+        <label class="seg-opt"><input type="radio" name="iv" data-iv="1day" checked />Daily</label>
+        <label class="seg-opt"><input type="radio" name="iv" data-iv="1week" />Weekly</label>
+        <label class="seg-opt"><input type="radio" name="iv" data-iv="1h" />Hourly</label>
       </div>
-      <canvas id="chart-canvas" width="600" height="260"></canvas>
-      <p id="chart-status" class="muted small"></p>
+      <div class="chart-canvas-wrap">
+        <canvas id="chart-canvas" width="700" height="280"></canvas>
+      </div>
+      <p class="muted small" style="margin: 0">Fetched on click only — never on the polling cycle.</p>
     </div>
   </div>
 
