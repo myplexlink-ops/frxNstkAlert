@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/broadsheet-c59468fe-4942-49be-98b7-91de4800479c/styles.css">
+<script src="_ds/broadsheet-c59468fe-4942-49be-98b7-91de4800479c/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css">
+<style>
+  html, body { margin: 0; background: var(--color-bg); }
+  @keyframes livepulse { 0%,100% { opacity: 1 } 50% { opacity: 0.25 } }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; background: var(--color-bg); color: var(--color-text); padding-bottom: 80px">
+
+  <header style="max-width: 1200px; margin: 0 auto; padding: 22px 44px 0">
+    <div style="display: flex; align-items: baseline; gap: 24px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-700)">
+      <span>Friday, 28 August 2026</span>
+      <span style="display: flex; align-items: center; gap: 7px">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent-2); animation: livepulse 2.4s ease-in-out infinite"></span>
+        Engine live · polled every minute
+      </span>
+      <span style="margin-left: auto; display: flex; align-items: center; gap: 16px; text-transform: none; letter-spacing: 0.02em; font-size: 12px">
+        <span>{{ userEmail }}</span>
+        <a href="#" onClick="{{ noop }}" style="color: var(--color-accent-700)">Log out</a>
+      </span>
+    </div>
+
+    <div style="height: 4px; background: var(--color-text); margin-top: 10px"></div>
+    <div style="height: 1px; background: var(--color-text); margin-top: 3px"></div>
+
+    <div style="display: flex; align-items: flex-end; gap: 32px; padding: 18px 0 14px">
+      <h1 style="font-size: 62px; line-height: 0.92; letter-spacing: -0.03em; margin: 0">The Alert Desk</h1>
+      <p style="margin: 0 0 6px; font-size: 13px; max-width: 300px; color: var(--color-neutral-700); text-wrap: pretty">Forex &amp; equity price alerts, delivered to Telegram and browser push whether or not this page is open.</p>
+      <button class="btn btn-primary" onClick="{{ openNew }}" style="margin-left: auto; margin-bottom: 6px; flex: none; white-space: nowrap"><i class="ph-duotone ph-bell-ringing" style="font-size: 16px"></i> New alert</button>
+    </div>
+
+    <div style="height: 1px; background: var(--color-text)"></div>
+    <nav style="display: flex; gap: 26px; padding: 9px 0 0; flex-wrap: wrap">
+      <button onClick="{{ goDesk }}" style="background: none; border: 0; border-bottom: 2px solid {{ ulDesk }}; padding: 0 0 7px; font: inherit; font-size: 14px; cursor: pointer; color: {{ cDesk }}">Front page</button>
+      <button onClick="{{ goAlerts }}" style="background: none; border: 0; border-bottom: 2px solid {{ ulAlerts }}; padding: 0 0 7px; font: inherit; font-size: 14px; cursor: pointer; color: {{ cAlerts }}">Alerts</button>
+      <button onClick="{{ goWatch }}" style="background: none; border: 0; border-bottom: 2px solid {{ ulWatch }}; padding: 0 0 7px; font: inherit; font-size: 14px; cursor: pointer; color: {{ cWatch }}">Watchlist</button>
+      <button onClick="{{ goMarket }}" style="background: none; border: 0; border-bottom: 2px solid {{ ulMarket }}; padding: 0 0 7px; font: inherit; font-size: 14px; cursor: pointer; color: {{ cMarket }}">Market</button>
+      <button onClick="{{ goCalc }}" style="background: none; border: 0; border-bottom: 2px solid {{ ulCalc }}; padding: 0 0 7px; font: inherit; font-size: 14px; cursor: pointer; color: {{ cCalc }}">Calculator</button>
+      <button onClick="{{ goNotif }}" style="background: none; border: 0; border-bottom: 2px solid {{ ulNotif }}; padding: 0 0 7px; font: inherit; font-size: 14px; cursor: pointer; color: {{ cNotif }}">Delivery</button>
+      <button onClick="{{ goAdmin }}" style="background: none; border: 0; border-bottom: 2px solid {{ ulAdmin }}; padding: 0 0 7px; font: inherit; font-size: 14px; cursor: pointer; color: {{ cAdmin }}">Admin</button>
+      <button onClick="{{ goStates }}" style="background: none; border: 0; border-bottom: 2px solid {{ ulStates }}; padding: 0 0 7px; font: inherit; font-size: 14px; cursor: pointer; color: {{ cStates }}">Entry states</button>
+    </nav>
+    <div style="height: 1px; background: var(--color-divider)"></div>
+  </header>
+
+  <main style="max-width: 1200px; margin: 0 auto; padding: 34px 44px 0">
+
+    <!-- ══ FRONT PAGE ══ -->
+    <sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}">
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 56px; align-items: start">
+
+        <div>
+          <p style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); margin: 0 0 8px">Closest to firing</p>
+          <h2 style="font-size: 38px; max-width: 15ch; line-height: 1.02; margin: 0 0 6px; text-wrap: pretty">{{ leadHeadline }}</h2>
+          <p style="font-size: 14px; color: var(--color-neutral-700); max-width: 52ch">{{ leadStandfirst }}</p>
+
+          <table class="table" style="margin-top: 26px">
+            <thead>
+              <tr>
+                <th style="width: 22%">Symbol</th>
+                <th>Condition</th>
+                <th style="text-align: right">Last</th>
+                <th style="text-align: right">Target</th>
+                <th style="width: 26%">Distance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ nearRows }}" as="r" hint-placeholder-count="4">
+                <tr>
+                  <td style="white-space: nowrap">
+                    <button onClick="{{ r.openChart }}" style="background: none; border: 0; padding: 0; font: inherit; font-size: 15px; cursor: pointer; color: var(--color-accent-700); text-decoration: underline; text-underline-offset: 3px">{{ r.symbol }}</button>
+                  </td>
+                  <td style="color: var(--color-neutral-800)">{{ r.conditionText }}</td>
+                  <td style="text-align: right; font-variant-numeric: tabular-nums">{{ r.lastText }}</td>
+                  <td style="text-align: right; font-variant-numeric: tabular-nums">{{ r.targetText }}</td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 10px">
+                      <div style="flex: 1; height: 6px; background: var(--color-neutral-300); position: relative">
+                        <div style="position: absolute; inset: 0 auto 0 0; background: var(--color-accent-2); width: {{ r.barW }}"></div>
+                      </div>
+                      <span style="font-variant-numeric: tabular-nums; font-size: 13px; width: 5ch; text-align: right">{{ r.distText }}</span>
+                    </div>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          <p style="font-size: 12px; color: var(--color-neutral-700); margin-top: 10px">Distance bar fills as the last polled price approaches the target. Prices are the engine's own cache — opening this page costs no market-data credits.</p>
+
+          <div style="height: 1px; background: var(--color-divider); margin: 34px 0 26px"></div>
+
+          <h3 style="font-size: 22px; margin: 0 0 14px">Movers on your watchlist</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 26px">
+            <sc-for list="{{ moverCards }}" as="m" hint-placeholder-count="4">
+              <button onClick="{{ m.openChart }}" style="background: none; border: 0; border-top: 1px solid var(--color-text); padding: 10px 0 0; text-align: left; cursor: pointer; font: inherit" style-hover="background: color-mix(in srgb, var(--color-text) 4%, transparent)">
+                <div style="font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-neutral-700)">{{ m.symbol }}</div>
+                <sc-if value="{{ m.up }}">
+                  <div style="font-size: 30px; line-height: 1.05; color: var(--color-accent-700); font-variant-numeric: tabular-nums">{{ m.pctText }}</div>
+                </sc-if>
+                <sc-if value="{{ m.down }}">
+                  <div style="font-size: 30px; line-height: 1.05; color: var(--color-accent-2-700); font-variant-numeric: tabular-nums">{{ m.pctText }}</div>
+                </sc-if>
+                <div style="font-size: 13px; color: var(--color-neutral-700); font-variant-numeric: tabular-nums">{{ m.lastText }}</div>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+
+        <aside style="display: flex; flex-direction: column; gap: 30px">
+          <div>
+            <h4 style="font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 12px">Engine</h4>
+            <div style="height: 1px; background: var(--color-text); margin-bottom: 12px"></div>
+            <dl style="margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 7px 12px; font-size: 13px">
+              <dt style="color: var(--color-neutral-700)">Last cycle</dt><dd style="margin: 0; text-align: right">41s ago</dd>
+              <dt style="color: var(--color-neutral-700)">Active alerts</dt><dd style="margin: 0; text-align: right">{{ activeCount }}</dd>
+              <dt style="color: var(--color-neutral-700)">Symbols polled</dt><dd style="margin: 0; text-align: right">{{ symbolCount }}</dd>
+              <dt style="color: var(--color-neutral-700)">Credits today</dt><dd style="margin: 0; text-align: right">312 / 800</dd>
+            </dl>
+            <p style="font-size: 12px; color: var(--color-neutral-700); margin: 12px 0 0">Polling, not tick-level: each alert is re-checked on its own 1–5 minute interval.</p>
+          </div>
+
+          <div>
+            <h4 style="font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 12px">Fired recently</h4>
+            <div style="height: 1px; background: var(--color-text); margin-bottom: 12px"></div>
+            <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px">
+              <sc-for list="{{ fires }}" as="f" hint-placeholder-count="3">
+                <li style="font-size: 13px">
+                  <div style="font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-neutral-600)">{{ f.when }}</div>
+                  <div style="margin: 1px 0 3px"><strong>{{ f.symbol }}</strong> {{ f.what }}</div>
+                  <div style="display: flex; gap: 6px">
+                    <span class="tag tag-accent">{{ f.tg }}</span>
+                    <span class="tag tag-neutral">{{ f.push }}</span>
+                  </div>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style="font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 12px">Delivery</h4>
+            <div style="height: 1px; background: var(--color-text); margin-bottom: 12px"></div>
+            <ul style="list-style: none; margin: 0; padding: 0; font-size: 13px; display: flex; flex-direction: column; gap: 8px">
+              <li style="display: flex; justify-content: space-between"><span>Telegram</span><span style="color: var(--color-accent-700)">Linked</span></li>
+              <li style="display: flex; justify-content: space-between"><span>Browser push</span><span style="color: var(--color-accent-700)">Subscribed</span></li>
+              <li style="display: flex; justify-content: space-between"><span>In-page chime</span><span>{{ soundLabel }}</span></li>
+            </ul>
+            <button class="btn btn-secondary btn-block" onClick="{{ goNotif }}">Manage delivery</button>
+          </div>
+        </aside>
+      </div>
+    </sc-if>
+
+    <!-- ══ ALERTS ══ -->
+    <sc-if value="{{ isAlerts }}">
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 24px">
+        <div>
+          <h2 style="font-size: 34px; margin: 0 0 4px">Your alerts</h2>
+          <p style="font-size: 14px; color: var(--color-neutral-700); margin: 0; max-width: 60ch">One-time alerts deactivate after firing; recurring alerts re-arm once the price crosses back through the level.</p>
+        </div>
+        <button class="btn btn-primary" onClick="{{ openNew }}">+ New alert</button>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin: 22px 0 0; flex-wrap: wrap">
+        <sc-for list="{{ alertFilters }}" as="fl" hint-placeholder-count="4">
+          <button onClick="{{ fl.set }}" class="{{ fl.cls }}" style="cursor: pointer">{{ fl.label }}</button>
+        </sc-for>
+      </div>
+
+      <table class="table" style="margin-top: 18px">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Condition</th>
+            <th style="text-align: right">Target</th>
+            <th style="text-align: right">Last price</th>
+            <th>Every</th>
+            <th>Mode</th>
+            <th>State</th>
+            <th style="text-align: right">·</th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ alertRows }}" as="a" hint-placeholder-count="6">
+            <tr>
+              <td style="white-space: nowrap">
+                <div style="font-size: 15px">{{ a.symbol }}</div>
+                <div style="font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-neutral-600)">{{ a.type }}</div>
+              </td>
+              <td style="color: var(--color-neutral-800)">{{ a.conditionText }}</td>
+              <td style="text-align: right; font-variant-numeric: tabular-nums">{{ a.targetText }}</td>
+              <td style="text-align: right; font-variant-numeric: tabular-nums">{{ a.lastText }}</td>
+              <td style="white-space: nowrap">{{ a.intervalText }}</td>
+              <td>{{ a.modeText }}</td>
+              <td>
+                <sc-if value="{{ a.armed }}"><span class="tag tag-accent">Armed</span></sc-if>
+                <sc-if value="{{ a.fired }}"><span class="tag tag-accent-2">Fired {{ a.firedWhen }}</span></sc-if>
+              </td>
+              <td style="text-align: right; white-space: nowrap">
+                <button class="btn btn-ghost" onClick="{{ a.edit }}">Edit</button>
+                <button class="btn btn-ghost" onClick="{{ a.remove }}" style="color: var(--color-accent-2-700)">Delete</button>
+              </td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      <sc-if value="{{ alertsEmpty }}">
+        <p style="font-size: 15px; color: var(--color-neutral-700); margin-top: 24px">Nothing matches this filter.</p>
+      </sc-if>
+    </sc-if>
+
+    <!-- ══ WATCHLIST ══ -->
+    <sc-if value="{{ isWatch }}">
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 56px; align-items: start">
+        <div>
+          <h2 style="font-size: 34px; margin: 0 0 4px">Watchlist</h2>
+          <p style="font-size: 14px; color: var(--color-neutral-700); max-width: 60ch">Symbols here feed the movers table, the sector breakdown and the calculator's price prefill. Adding a symbol does not create an alert.</p>
+
+          <table class="table" style="margin-top: 22px">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th style="text-align: right">Last polled</th>
+                <th style="text-align: right">Change</th>
+                <th style="text-align: right">Alerts</th>
+                <th style="text-align: right">·</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ watchRows }}" as="w" hint-placeholder-count="6">
+                <tr>
+                  <td>
+                    <button onClick="{{ w.openChart }}" style="background: none; border: 0; padding: 0; font: inherit; font-size: 15px; cursor: pointer; color: var(--color-accent-700); text-decoration: underline; text-underline-offset: 3px">{{ w.symbol }}</button>
+                  </td>
+                  <td style="font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-neutral-600)">{{ w.type }}</td>
+                  <td style="text-align: right; font-variant-numeric: tabular-nums">{{ w.lastText }}</td>
+                  <td style="text-align: right; font-variant-numeric: tabular-nums">
+                    <sc-if value="{{ w.up }}"><span style="color: var(--color-accent-700)">{{ w.pctText }}</span></sc-if>
+                    <sc-if value="{{ w.down }}"><span style="color: var(--color-accent-2-700)">{{ w.pctText }}</span></sc-if>
+                  </td>
+                  <td style="text-align: right">{{ w.alertText }}</td>
+                  <td style="text-align: right; white-space: nowrap">
+                    <button class="btn btn-ghost" onClick="{{ w.addAlert }}">Set alert</button>
+                    <button class="btn btn-ghost" onClick="{{ w.remove }}" style="color: var(--color-accent-2-700)">Remove</button>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+
+        <aside>
+          <h4 style="font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 12px">Add a symbol</h4>
+          <div style="height: 1px; background: var(--color-text); margin-bottom: 16px"></div>
+          <div class="field" style="margin-bottom: 14px">
+            <label>Asset type</label>
+            <div class="seg">
+              <label class="seg-opt"><input type="radio" name="wtype" checked="{{ wForex }}" onChange="{{ setWForex }}" />Forex</label>
+              <label class="seg-opt"><input type="radio" name="wtype" checked="{{ wStock }}" onChange="{{ setWStock }}" />Stock</label>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom: 14px">
+            <label>Symbol</label>
+            <input class="input" placeholder="{{ wPlaceholder }}" value="{{ wSymbol }}" onChange="{{ setWSymbol }}" />
+          </div>
+          <button class="btn btn-primary btn-block" onClick="{{ addWatch }}">Add to watchlist</button>
+          <p style="font-size: 12px; color: var(--color-neutral-700); margin-top: 14px">Forex uses slash notation (EUR/USD). Equities use the plain ticker. A new equity is classified into a sector at the next daily refresh.</p>
+        </aside>
+      </div>
+    </sc-if>
+
+    <!-- ══ MARKET ══ -->
+    <sc-if value="{{ isMarket }}">
+      <h2 style="font-size: 34px; margin: 0 0 4px">Market</h2>
+      <p style="font-size: 14px; color: var(--color-neutral-700); max-width: 66ch">Read-only context on your own watchlist, built from prices the alert engine already fetched. Click any ticker for its price history.</p>
+
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; margin-top: 30px; align-items: start">
+        <section>
+          <h3 style="font-size: 22px; margin: 0 0 4px">Movers</h3>
+          <p style="font-size: 12px; color: var(--color-neutral-700); margin: 0 0 10px">Ranked by size of move; unpriced symbols last.</p>
+          <table class="table">
+            <thead><tr><th>Symbol</th><th style="text-align: right">Last</th><th style="text-align: right">Prev close</th><th style="text-align: right">Change</th></tr></thead>
+            <tbody>
+              <sc-for list="{{ moverRows }}" as="m" hint-placeholder-count="6">
+                <tr>
+                  <td><button onClick="{{ m.openChart }}" style="background: none; border: 0; padding: 0; font: inherit; font-size: 15px; cursor: pointer; color: var(--color-accent-700); text-decoration: underline; text-underline-offset: 3px">{{ m.symbol }}</button></td>
+                  <td style="text-align: right; font-variant-numeric: tabular-nums">{{ m.lastText }}</td>
+                  <td style="text-align: right; font-variant-numeric: tabular-nums; color: var(--color-neutral-700)">{{ m.prevText }}</td>
+                  <td style="text-align: right; font-variant-numeric: tabular-nums">
+                    <sc-if value="{{ m.up }}"><span style="color: var(--color-accent-700)">{{ m.pctText }}</span></sc-if>
+                    <sc-if value="{{ m.down }}"><span style="color: var(--color-accent-2-700)">{{ m.pctText }}</span></sc-if>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h3 style="font-size: 22px; margin: 0 0 4px">Risk</h3>
+          <p style="font-size: 12px; color: var(--color-neutral-700); margin: 0 0 10px">Signed distance from the last price to each active alert's target.</p>
+          <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0">
+            <sc-for list="{{ riskRows }}" as="r" hint-placeholder-count="6">
+              <li style="padding: 12px 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                <div style="display: flex; align-items: baseline; gap: 10px">
+                  <strong style="font-size: 15px">{{ r.symbol }}</strong>
+                  <span style="font-size: 13px; color: var(--color-neutral-700)">{{ r.conditionText }} {{ r.targetText }}</span>
+                  <span style="margin-left: auto; font-variant-numeric: tabular-nums; font-size: 14px">{{ r.distText }}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 7px">
+                  <div style="flex: 1; height: 5px; background: var(--color-neutral-300); position: relative">
+                    <div style="position: absolute; inset: 0 auto 0 0; background: var(--color-accent); width: {{ r.barW }}"></div>
+                  </div>
+                  <sc-if value="{{ r.armed }}"><span class="tag tag-accent">Armed</span></sc-if>
+                  <sc-if value="{{ r.reached }}"><span class="tag tag-accent-2">Reached</span></sc-if>
+                  <sc-if value="{{ r.cooling }}"><span class="tag tag-neutral">Cooling down</span></sc-if>
+                </div>
+              </li>
+            </sc-for>
+          </ul>
+        </section>
+      </div>
+
+      <div style="height: 1px; background: var(--color-divider); margin: 40px 0 30px"></div>
+
+      <section>
+        <h3 style="font-size: 22px; margin: 0 0 4px">Sector breakdown</h3>
+        <p style="font-size: 12px; color: var(--color-neutral-700); margin: 0 0 6px">Equity watchlist only — forex is excluded. {{ sectorSummary }}</p>
+        <div style="display: flex; flex-direction: column; gap: 22px; margin-top: 20px; max-width: 780px">
+          <sc-for list="{{ sectorRows }}" as="s" hint-placeholder-count="4">
+            <div>
+              <div style="display: flex; align-items: baseline; gap: 12px">
+                <h4 style="margin: 0; font-size: 17px">{{ s.name }}</h4>
+                <span style="font-size: 12px; color: var(--color-neutral-700)">{{ s.countText }}</span>
+              </div>
+              <div style="height: 10px; background: var(--color-accent-300); margin: 8px 0 10px; width: {{ s.barW }}"></div>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                <sc-for list="{{ s.symbols }}" as="sym" hint-placeholder-count="3">
+                  <button onClick="{{ sym.openChart }}" class="tag tag-neutral" style="cursor: pointer; border: 0; font: inherit; font-size: 12px; gap: 8px">
+                    <span>{{ sym.symbol }}</span>
+                    <sc-if value="{{ sym.up }}"><span style="color: var(--color-accent-700); font-variant-numeric: tabular-nums">{{ sym.pctText }}</span></sc-if>
+                    <sc-if value="{{ sym.down }}"><span style="color: var(--color-accent-2-700); font-variant-numeric: tabular-nums">{{ sym.pctText }}</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <!-- ══ CALCULATOR ══ -->
+    <sc-if value="{{ isCalc }}">
+      <h2 style="font-size: 34px; margin: 0 0 4px">Position calculator</h2>
+      <p style="font-size: 14px; color: var(--color-neutral-700); max-width: 64ch">How many more shares to buy so the blended average cost lands on a target. Stateless — nothing here is saved, and no position is tracked.</p>
+
+      <div style="display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 56px; margin-top: 30px; align-items: start">
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <div class="field">
+            <label>Symbol — optional, prefills the buy price</label>
+            <input class="input" placeholder="AAPL" value="{{ calc.symbol }}" onChange="{{ setCalcSymbol }}" />
+          </div>
+          <div class="field">
+            <label>Shares currently owned</label>
+            <input class="input" type="number" step="any" placeholder="100" value="{{ calc.shares }}" onChange="{{ setCalcShares }}" />
+          </div>
+          <div class="field">
+            <label>Current average cost</label>
+            <input class="input" type="number" step="any" placeholder="150" value="{{ calc.avg }}" onChange="{{ setCalcAvg }}" />
+          </div>
+          <div class="field">
+            <label>Target average cost</label>
+            <input class="input" type="number" step="any" placeholder="140" value="{{ calc.target }}" onChange="{{ setCalcTarget }}" />
+          </div>
+          <div class="field">
+            <label>Hypothetical buy price</label>
+            <input class="input" type="number" step="any" placeholder="130" value="{{ calc.buy }}" onChange="{{ setCalcBuy }}" />
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px">
+            <button class="btn btn-secondary" onClick="{{ resetCalc }}">Reset</button>
+            <button class="btn btn-primary" onClick="{{ runCalc }}">Calculate</button>
+          </div>
+        </div>
+
+        <div>
+          <sc-if value="{{ calcOk }}">
+            <div>
+              <p style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); margin: 0 0 4px">Buy</p>
+              <div style="font-size: 76px; line-height: 0.95; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">{{ calcShares }}</div>
+              <p style="font-size: 16px; max-width: 40ch; margin: 10px 0 22px; text-wrap: pretty">{{ calcSentence }}</p>
+              <table class="table" style="max-width: 460px">
+                <tbody>
+                  <sc-for list="{{ calcLines }}" as="l" hint-placeholder-count="4">
+                    <tr>
+                      <td style="color: var(--color-neutral-700)">{{ l.k }}</td>
+                      <td style="text-align: right; font-variant-numeric: tabular-nums">{{ l.v }}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </sc-if>
+          <sc-if value="{{ calcBad }}">
+            <div style="border-left: 3px solid var(--color-accent-2); padding-left: 18px">
+              <h3 style="font-size: 22px; margin: 0 0 6px">Not reachable</h3>
+              <p style="font-size: 15px; max-width: 44ch; margin: 0">{{ calcReason }}</p>
+            </div>
+          </sc-if>
+          <sc-if value="{{ calcIdle }}">
+            <p style="font-size: 15px; color: var(--color-neutral-700); max-width: 40ch">Fill the four figures and calculate. The solve is <em>n = shares × (avg − target) ÷ (target − buy)</em>.</p>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ══ DELIVERY ══ -->
+    <sc-if value="{{ isNotif }}">
+      <h2 style="font-size: 34px; margin: 0 0 4px">Delivery</h2>
+      <p style="font-size: 14px; color: var(--color-neutral-700); max-width: 64ch">Every channel is attempted independently, so one failing never suppresses the other.</p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 32px">
+        <section>
+          <div style="display: flex; align-items: baseline; gap: 12px">
+            <h3 style="font-size: 22px; margin: 0">Telegram</h3>
+            <span class="tag tag-accent">Linked</span>
+          </div>
+          <div style="height: 1px; background: var(--color-text); margin: 10px 0 14px"></div>
+          <p style="font-size: 14px; color: var(--color-neutral-800)">Linked to <strong>@dmitri</strong> since 27 Aug. The bot replies in the chat you started it from.</p>
+          <ol style="font-size: 14px; padding-left: 20px; color: var(--color-neutral-800); display: flex; flex-direction: column; gap: 6px">
+            <li>Open <strong>@FxNStAlert_bot</strong> in Telegram.</li>
+            <li>Send the one-time code below.</li>
+            <li>The bot confirms; this page updates on refresh.</li>
+          </ol>
+          <div style="display: flex; gap: 10px; align-items: center; margin-top: 12px">
+            <code style="background: var(--color-surface); border: 1px solid var(--color-divider); padding: 8px 12px; font-size: 14px; flex: 1">/start 8F2K-DQ91</code>
+            <button class="btn btn-secondary" onClick="{{ noop }}">Copy</button>
+          </div>
+          <button class="btn btn-ghost" onClick="{{ noop }}" style="margin-top: 10px; align-self: flex-start">Generate a new code</button>
+        </section>
+
+        <section>
+          <div style="display: flex; align-items: baseline; gap: 12px">
+            <h3 style="font-size: 22px; margin: 0">Browser push</h3>
+            <span class="tag tag-accent">Subscribed</span>
+          </div>
+          <div style="height: 1px; background: var(--color-text); margin: 10px 0 14px"></div>
+          <p style="font-size: 14px; color: var(--color-neutral-800)">This browser is subscribed and will receive alerts with the tab closed. Push needs an https origin and a granted permission — a blocked permission shows here as “not subscribed”.</p>
+          <div style="display: flex; gap: 10px">
+            <button class="btn btn-secondary" onClick="{{ noop }}">Send a test push</button>
+            <button class="btn btn-ghost" onClick="{{ noop }}" style="color: var(--color-accent-2-700)">Unsubscribe</button>
+          </div>
+        </section>
+
+        <section>
+          <div style="display: flex; align-items: baseline; gap: 12px">
+            <h3 style="font-size: 22px; margin: 0">In-page chime</h3>
+            <span class="tag tag-neutral">{{ soundLabel }}</span>
+          </div>
+          <div style="height: 1px; background: var(--color-text); margin: 10px 0 14px"></div>
+          <p style="font-size: 14px; color: var(--color-neutral-800)">A convenience on top of the real channels: while this tab is open your alerts are re-read about every 45 seconds and a two-tone chime plays on a fresh trigger. It cannot fire with the tab closed.</p>
+          <div style="display: flex; gap: 10px; align-items: center">
+            <button class="btn btn-secondary" onClick="{{ toggleSound }}">{{ soundToggleText }}</button>
+            <button class="btn btn-ghost" onClick="{{ testSound }}">Test chime</button>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- ══ ADMIN ══ -->
+    <sc-if value="{{ isAdmin }}">
+      <h2 style="font-size: 34px; margin: 0 0 4px">Admin</h2>
+      <p style="font-size: 14px; color: var(--color-neutral-700); max-width: 64ch">New accounts can log in but see nothing until approved here. Approval is mirrored to the identity record and the database row.</p>
+
+      <h3 style="font-size: 22px; margin: 32px 0 10px">Awaiting approval <span style="color: var(--color-accent-2)">{{ pendingCount }}</span></h3>
+      <table class="table" style="max-width: 900px">
+        <thead><tr><th>Email</th><th>Signed up</th><th style="text-align: right">·</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ pendingRows }}" as="p" hint-placeholder-count="3">
+            <tr>
+              <td>{{ p.email }}</td>
+              <td style="color: var(--color-neutral-700)">{{ p.when }}</td>
+              <td style="text-align: right; white-space: nowrap">
+                <button class="btn btn-ghost" onClick="{{ p.approve }}">Approve</button>
+                <button class="btn btn-ghost" onClick="{{ p.approveAdmin }}">Approve as admin</button>
+                <button class="btn btn-ghost" onClick="{{ p.reject }}" style="color: var(--color-accent-2-700)">Reject</button>
+              </td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      <sc-if value="{{ pendingEmpty }}"><p style="font-size: 15px; color: var(--color-neutral-700)">No one is waiting.</p></sc-if>
+
+      <h3 style="font-size: 22px; margin: 40px 0 10px">All users</h3>
+      <table class="table" style="max-width: 900px">
+        <thead><tr><th>Email</th><th>Role</th><th style="text-align: right">Alerts</th><th>Channels</th><th>Last seen</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ userRows }}" as="u" hint-placeholder-count="4">
+            <tr>
+              <td>{{ u.email }}</td>
+              <td>{{ u.role }}</td>
+              <td style="text-align: right">{{ u.alerts }}</td>
+              <td style="color: var(--color-neutral-700)">{{ u.channels }}</td>
+              <td style="color: var(--color-neutral-700)">{{ u.seen }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </sc-if>
+
+    <!-- ══ ENTRY STATES ══ -->
+    <sc-if value="{{ isStates }}">
+      <h2 style="font-size: 34px; margin: 0 0 4px">Entry states</h2>
+      <p style="font-size: 14px; color: var(--color-neutral-700); max-width: 64ch">What a visitor sees before the desk is available to them.</p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 48px; margin-top: 34px">
+        <section>
+          <p style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); margin: 0 0 10px">Logged out</p>
+          <div style="background: var(--color-bg); box-shadow: var(--shadow-md); padding: 30px 32px 34px">
+            <div style="height: 4px; background: var(--color-text)"></div>
+            <div style="height: 1px; background: var(--color-text); margin-top: 3px"></div>
+            <h3 style="font-size: 40px; line-height: 0.95; letter-spacing: -0.03em; margin: 16px 0 10px">The Alert Desk</h3>
+            <p style="font-size: 14px; color: var(--color-neutral-800); max-width: 38ch">Price-level and %-change alerts on forex pairs and equities, checked every minute and delivered to Telegram and browser push — open tab or not.</p>
+            <p style="font-size: 12px; color: var(--color-neutral-700); max-width: 38ch">Polling-based, 1–5 minutes per alert. Not tick-level.</p>
+            <div style="display: flex; gap: 10px; margin-top: 18px">
+              <button class="btn btn-primary" onClick="{{ goDesk }}">Log in</button>
+              <button class="btn btn-secondary" onClick="{{ goStatesPending }}">Sign up</button>
+            </div>
+            <p style="font-size: 12px; color: var(--color-neutral-700); margin: 14px 0 0">New accounts need an administrator's approval before alerts can be created.</p>
+          </div>
+        </section>
+
+        <section>
+          <p style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-2-700); margin: 0 0 10px">Signed up, awaiting approval</p>
+          <div style="background: var(--color-bg); box-shadow: var(--shadow-md); padding: 30px 32px 34px">
+            <div style="height: 4px; background: var(--color-text)"></div>
+            <div style="height: 1px; background: var(--color-text); margin-top: 3px"></div>
+            <h3 style="font-size: 30px; line-height: 1; margin: 16px 0 10px">Your seat is being approved</h3>
+            <p style="font-size: 14px; color: var(--color-neutral-800); max-width: 38ch"><strong>dmitri@example.com</strong> exists but has no access yet. An administrator has to approve the account before it can hold a watchlist or alerts.</p>
+            <div style="display: flex; gap: 10px; margin-top: 18px">
+              <button class="btn btn-primary" onClick="{{ noop }}">Check again</button>
+              <button class="btn btn-ghost" onClick="{{ noop }}">Log out</button>
+            </div>
+            <p style="font-size: 12px; color: var(--color-neutral-700); margin: 14px 0 0">Nothing else on the desk is reachable — every endpoint refuses an unapproved account, not just this screen.</p>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+  </main>
+
+  <!-- ══ ALERT EDITOR ══ -->
+  <sc-if value="{{ modalAlert }}">
+    <div class="dialog-backdrop" style="z-index: 40">
+      <div class="dialog" style="width: min(520px, 100%); background: var(--color-bg)">
+        <div style="height: 3px; background: var(--color-text)"></div>
+        <h3 style="font-size: 26px; margin: 4px 0 0">{{ modalTitle }}</h3>
+        <div class="field">
+          <label>Asset type</label>
+          <div class="seg">
+            <label class="seg-opt"><input type="radio" name="atype" checked="{{ fForex }}" onChange="{{ setFForex }}" />Forex</label>
+            <label class="seg-opt"><input type="radio" name="atype" checked="{{ fStock }}" onChange="{{ setFStock }}" />Stock</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Symbol</label>
+          <input class="input" placeholder="{{ fPlaceholder }}" value="{{ form.symbol }}" onChange="{{ setFSymbol }}" />
+        </div>
+        <div class="field">
+          <label>Condition</label>
+          <select class="input" value="{{ form.condition }}" onChange="{{ setFCondition }}">
+            <option value="cross_above">Price crosses above</option>
+            <option value="cross_below">Price crosses below</option>
+            <option value="pct_change">% change reaches</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>{{ fTargetLabel }}</label>
+          <input class="input" type="number" step="any" value="{{ form.target }}" onChange="{{ setFTarget }}" />
+        </div>
+        <sc-if value="{{ fIsPct }}">
+          <div class="field">
+            <label>Reference price — blank compares against the previous close</label>
+            <input class="input" type="number" step="any" value="{{ form.ref }}" onChange="{{ setFRef }}" />
+          </div>
+        </sc-if>
+        <div class="field">
+          <label>Re-check interval — {{ fIntervalLabel }}</label>
+          <input type="range" min="1" max="5" step="1" value="{{ form.interval }}" onChange="{{ setFInterval }}" style="width: 100%; accent-color: var(--color-accent)" />
+        </div>
+        <label class="radio" style="gap: 10px">
+          <input type="checkbox" checked="{{ form.recurring }}" onChange="{{ toggleRecurring }}" style="position: static; opacity: 1; width: 16px; height: 16px; accent-color: var(--color-accent)" />
+          <span style="font-size: 14px">Recurring — re-arms after the price crosses back through the level</span>
+        </label>
+        <p style="font-size: 12px; color: var(--color-neutral-700); margin: 0">{{ fSummary }}</p>
+        <div class="dialog-actions">
+          <button class="btn btn-secondary" onClick="{{ closeModal }}">Cancel</button>
+          <button class="btn btn-primary" onClick="{{ saveAlert }}">{{ fSaveLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ══ CHART ══ -->
+  <sc-if value="{{ modalChart }}">
+    <div class="dialog-backdrop" style="z-index: 40">
+      <div class="dialog" style="width: min(760px, 100%); background: var(--color-bg)">
+        <div style="display: flex; align-items: baseline; gap: 16px">
+          <h3 style="font-size: 26px; margin: 0">{{ chartSymbol }}</h3>
+          <span style="font-size: 14px; color: var(--color-neutral-700); font-variant-numeric: tabular-nums">{{ chartLast }}</span>
+          <button class="btn btn-ghost" onClick="{{ closeModal }}" style="margin-left: auto">Close</button>
+        </div>
+        <div style="height: 1px; background: var(--color-text)"></div>
+        <div class="seg" style="align-self: flex-start">
+          <label class="seg-opt"><input type="radio" name="iv" checked="{{ ivDay }}" onChange="{{ setIvDay }}" />Daily</label>
+          <label class="seg-opt"><input type="radio" name="iv" checked="{{ ivWeek }}" onChange="{{ setIvWeek }}" />Weekly</label>
+          <label class="seg-opt"><input type="radio" name="iv" checked="{{ ivHour }}" onChange="{{ setIvHour }}" />Hourly</label>
+        </div>
+        <svg viewBox="0 0 700 280" style="width: 100%; height: auto; display: block">
+          <line x1="0" y1="0" x2="700" y2="0" stroke="var(--color-neutral-300)" stroke-width="1"></line>
+          <line x1="0" y1="93" x2="700" y2="93" stroke="var(--color-neutral-300)" stroke-width="1"></line>
+          <line x1="0" y1="186" x2="700" y2="186" stroke="var(--color-neutral-300)" stroke-width="1"></line>
+          <line x1="0" y1="279" x2="700" y2="279" stroke="var(--color-neutral-400)" stroke-width="1"></line>
+          <path d="{{ chartArea }}" fill="var(--color-accent-200)" opacity="0.55"></path>
+          <path d="{{ chartPath }}" fill="none" stroke="var(--color-accent)" stroke-width="2"></path>
+          <sc-for list="{{ chartTargets }}" as="t" hint-placeholder-count="1">
+            <line x1="0" y1="{{ t.y }}" x2="700" y2="{{ t.y }}" stroke="var(--color-accent-2)" stroke-width="1" stroke-dasharray="5 4"></line>
+          </sc-for>
+        </svg>
+        <div style="display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-neutral-600)">
+          <span>{{ chartFrom }}</span>
+          <span>{{ chartRange }}</span>
+          <span>{{ chartTo }}</span>
+        </div>
+        <p style="font-size: 12px; color: var(--color-neutral-700); margin: 0">Fetched on click only — never on the polling cycle. Dashed magenta marks this symbol's alert levels.</p>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}">
+    <div style="position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%); background: var(--color-text); color: var(--color-bg); padding: 12px 22px; font-size: 14px; box-shadow: var(--shadow-lg); z-index: 60">{{ toastText }}</div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;desk&quot;,&quot;alerts&quot;,&quot;watch&quot;,&quot;market&quot;,&quot;calc&quot;,&quot;notif&quot;,&quot;admin&quot;,&quot;states&quot;],&quot;default&quot;:&quot;desk&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Desk&quot;},&quot;nearThresholdPct&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0.5,&quot;max&quot;:10,&quot;step&quot;:0.5,&quot;default&quot;:2,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Desk&quot;}}">
+const WATCH = [
+  { symbol: 'NVDA', type: 'stock', price: 181.36, prev: 175.37, pct: 3.42, sector: 'Semiconductors' },
+  { symbol: 'XOM', type: 'stock', price: 112.77, prev: 115.16, pct: -2.08, sector: 'Energy' },
+  { symbol: 'MSFT', type: 'stock', price: 507.88, prev: 514.10, pct: -1.21, sector: 'Software' },
+  { symbol: 'AAPL', type: 'stock', price: 232.14, prev: 229.98, pct: 0.94, sector: 'Semiconductors' },
+  { symbol: 'GBP/JPY', type: 'forex', price: 198.42, prev: 196.83, pct: 0.81, sector: null },
+  { symbol: 'PFE', type: 'stock', price: 24.63, prev: 24.76, pct: -0.51, sector: null },
+  { symbol: 'JPM', type: 'stock', price: 298.05, prev: 296.80, pct: 0.42, sector: 'Banking' },
+  { symbol: 'EUR/USD', type: 'forex', price: 1.1642, prev: 1.1682, pct: -0.34, sector: null },
+  { symbol: 'USD/CHF', type: 'forex', price: 0.8031, prev: 0.8041, pct: -0.12, sector: null }
+];
+
+const ALERTS = [
+  { id: 1, symbol: 'NVDA', type: 'stock', condition: 'cross_above', target: 185, interval: 1, recurring: false, armed: true, fired: null },
+  { id: 2, symbol: 'NVDA', type: 'stock', condition: 'cross_below', target: 172.5, interval: 1, recurring: true, armed: true, fired: null },
+  { id: 3, symbol: 'NVDA', type: 'stock', condition: 'pct_change', target: 5, ref: null, interval: 2, recurring: true, armed: true, fired: null },
+  { id: 4, symbol: 'EUR/USD', type: 'forex', condition: 'cross_below', target: 1.16, interval: 1, recurring: true, armed: true, fired: null },
+  { id: 5, symbol: 'EUR/USD', type: 'forex', condition: 'cross_above', target: 1.175, interval: 5, recurring: false, armed: false, fired: '27 Aug, 14:02' },
+  { id: 6, symbol: 'GBP/JPY', type: 'forex', condition: 'cross_above', target: 199, interval: 1, recurring: false, armed: true, fired: null },
+  { id: 7, symbol: 'AAPL', type: 'stock', condition: 'cross_below', target: 228, interval: 3, recurring: true, armed: true, fired: null },
+  { id: 8, symbol: 'MSFT', type: 'stock', condition: 'cross_above', target: 515, interval: 5, recurring: false, armed: true, fired: null },
+  { id: 9, symbol: 'XOM', type: 'stock', condition: 'cross_below', target: 110, interval: 2, recurring: true, armed: true, fired: null }
+];
+
+const COND = { cross_above: 'crosses above', cross_below: 'crosses below', pct_change: '% change reaches' };
+
+class Component extends DCLogic {
+  state = {
+    view: this.props.startView || 'desk',
+    filter: 'All',
+    modal: null,
+    editId: null,
+    chartSym: null,
+    iv: '1day',
+    sound: true,
+    toast: null,
+    wType: 'forex',
+    wSymbol: '',
+    form: { symbol: '', type: 'forex', condition: 'cross_above', target: '', ref: '', interval: 1, recurring: false },
+    calc: { symbol: '', shares: '', avg: '', target: '', buy: '' },
+    result: null
+  };
+
+  // ── helpers ──
+  fmt(sym, n) {
+    if (n == null) return '—';
+    const w = WATCH.find(x => x.symbol === sym);
+    if (w && w.type === 'forex') return n.toFixed(sym.includes('JPY') ? 2 : 4);
+    return n.toFixed(2);
+  }
+  pctText(p) { return (p > 0 ? '+' : '') + p.toFixed(2) + '%'; }
+  price(sym) { const w = WATCH.find(x => x.symbol === sym); return w ? w.price : null; }
+  go(v) { return () => this.setState({ view: v, modal: null }); }
+  flash(t) {
+    this.setState({ toast: t });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: null }), 2200);
+  }
+
+  distance(a) {
+    const p = this.price(a.symbol);
+    if (p == null) return null;
+    if (a.condition === 'cross_above') return a.target - p;
+    if (a.condition === 'cross_below') return p - a.target;
+    const w = WATCH.find(x => x.symbol === a.symbol);
+    return a.target - Math.abs(w ? w.pct : 0);
+  }
+  distPct(a) {
+    const d = this.distance(a), p = this.price(a.symbol);
+    if (d == null) return null;
+    return a.condition === 'pct_change' ? d : (d / p) * 100;
+  }
+
+  riskRow(a) {
+    const dp = this.distPct(a);
+    const reached = dp != null && dp <= 0;
+    const thr = this.props.nearThresholdPct ?? 2;
+    const fill = dp == null ? 0 : Math.max(4, Math.min(100, (1 - Math.abs(dp) / (thr * 2.5)) * 100));
+    return {
+      id: a.id,
+      symbol: a.symbol,
+      conditionText: COND[a.condition],
+      targetText: a.condition === 'pct_change' ? a.target.toFixed(2) + '%' : this.fmt(a.symbol, a.target),
+      lastText: this.fmt(a.symbol, this.price(a.symbol)),
+      distText: dp == null ? '—' : (dp > 0 ? '' : '−') + Math.abs(dp).toFixed(2) + '%',
+      barW: fill.toFixed(1) + '%',
+      dp,
+      armed: a.armed && !reached,
+      reached: reached && a.armed,
+      cooling: !a.armed,
+      openChart: () => this.setState({ modal: 'chart', chartSym: a.symbol, iv: '1day' })
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const v = s.view;
+    const ink = 'var(--color-text)';
+    const acc = 'var(--color-accent-700)';
+    const nav = k => ({
+      ['ul' + k]: v === k.toLowerCase() ? 'var(--color-accent-2)' : 'transparent',
+      ['c' + k]: v === k.toLowerCase() ? acc : ink
+    });
+    const navs = Object.assign({}, nav('Desk'), nav('Alerts'), nav('Watch'), nav('Market'), nav('Calc'), nav('Notif'), nav('Admin'), nav('States'));
+    navs.ulWatch = v === 'watch' ? 'var(--color-accent-2)' : 'transparent';
+
+    const risks = ALERTS.map(a => this.riskRow(a)).sort((a, b) => Math.abs(a.dp ?? 1e9) - Math.abs(b.dp ?? 1e9));
+    const thr = this.props.nearThresholdPct ?? 2;
+    const near = risks.filter(r => r.dp != null && Math.abs(r.dp) <= thr).slice(0, 5);
+    const nearRows = (near.length ? near : risks.slice(0, 4));
+
+    const movers = WATCH.slice().sort((a, b) => Math.abs(b.pct) - Math.abs(a.pct)).map(w => ({
+      symbol: w.symbol,
+      lastText: this.fmt(w.symbol, w.price),
+      prevText: this.fmt(w.symbol, w.prev),
+      pctText: this.pctText(w.pct),
+      up: w.pct > 0, down: w.pct <= 0,
+      openChart: () => this.setState({ modal: 'chart', chartSym: w.symbol, iv: '1day' })
+    }));
+
+    // sectors
+    const stocks = WATCH.filter(w => w.type === 'stock');
+    const groups = {};
+    stocks.forEach(w => { const k = w.sector || 'Unclassified'; (groups[k] = groups[k] || []).push(w); });
+    const maxCount = Math.max.apply(null, Object.values(groups).map(g => g.length));
+    const sectorRows = Object.keys(groups).sort((a, b) => (a === 'Unclassified' ? 1 : b === 'Unclassified' ? -1 : groups[b].length - groups[a].length)).map(k => ({
+      name: k,
+      countText: groups[k].length === 1 ? '1 symbol' : groups[k].length + ' symbols',
+      barW: Math.round((groups[k].length / maxCount) * 100) + '%',
+      symbols: groups[k].map(w => ({
+        symbol: w.symbol, pctText: this.pctText(w.pct), up: w.pct > 0, down: w.pct <= 0,
+        openChart: () => this.setState({ modal: 'chart', chartSym: w.symbol, iv: '1day' })
+      }))
+    }));
+    const classified = stocks.filter(w => w.sector).length;
+
+    // alerts table
+    const filt = s.filter;
+    const list = ALERTS.filter(a => filt === 'All' || (filt === 'Armed' && a.armed) || (filt === 'Fired' && !a.armed) || (filt === 'Recurring' && a.recurring));
+    const alertRows = list.map(a => ({
+      symbol: a.symbol,
+      type: a.type,
+      conditionText: COND[a.condition] + (a.condition === 'pct_change' ? '' : ''),
+      targetText: a.condition === 'pct_change' ? a.target.toFixed(2) + '%' : this.fmt(a.symbol, a.target),
+      lastText: this.fmt(a.symbol, this.price(a.symbol)),
+      intervalText: a.interval + ' min',
+      modeText: a.recurring ? 'Recurring' : 'One-time',
+      armed: a.armed, fired: !a.armed, firedWhen: a.fired || '',
+      edit: () => this.setState({
+        modal: 'alert', editId: a.id,
+        form: { symbol: a.symbol, type: a.type, condition: a.condition, target: String(a.target), ref: '', interval: a.interval, recurring: a.recurring }
+      }),
+      remove: () => this.flash(a.symbol + ' alert deleted')
+    }));
+
+    // chart
+    const cs = s.chartSym;
+    let chart = { path: '', area: '', from: '', to: '', range: '', last: '', targets: [] };
+    if (cs) {
+      const base = this.price(cs) || 100;
+      const n = s.iv === '1h' ? 48 : 30;
+      let seed = cs.split('').reduce((t, c) => t + c.charCodeAt(0), 0) + (s.iv === '1week' ? 7 : s.iv === '1h' ? 3 : 0);
+      const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+      const amp = s.iv === '1week' ? 0.09 : s.iv === '1h' ? 0.012 : 0.045;
+      const pts = [];
+      let x = base * (1 - amp * 0.9);
+      for (let i = 0; i < n; i++) { x = x * (1 + (rnd() - 0.45) * amp * 0.35); pts.push(x); }
+      const drift = base - pts[n - 1];
+      for (let i = 0; i < n; i++) pts[i] += drift * (i / (n - 1));
+      const lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts);
+      const span = (hi - lo) || 1;
+      const X = i => (i / (n - 1)) * 700;
+      const Y = p => 268 - ((p - lo) / span) * 250;
+      chart.path = pts.map((p, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p).toFixed(1)).join(' ');
+      chart.area = chart.path + ' L700 279 L0 279 Z';
+      chart.last = this.fmt(cs, base);
+      chart.range = s.iv === '1week' ? 'Weekly · 30 bars' : s.iv === '1h' ? 'Hourly · 48 bars' : 'Daily · 30 bars';
+      chart.from = s.iv === '1h' ? '26 Aug 09:00' : s.iv === '1week' ? 'Feb 2026' : '18 Jul';
+      chart.to = '28 Aug';
+      chart.targets = ALERTS.filter(a => a.symbol === cs && a.condition !== 'pct_change' && a.target >= lo && a.target <= hi)
+        .map(a => ({ y: Y(a.target).toFixed(1) }));
+    }
+
+    // calculator
+    const r = s.result;
+    const num = k => { const x = parseFloat(s.calc[k]); return isFinite(x) ? x : null; };
+
+    const leadTop = risks.find(x => x.dp != null);
+    const nearCount = risks.filter(x => x.dp != null && Math.abs(x.dp) <= thr && !x.cooling).length;
+
+    return Object.assign(navs, {
+      userEmail: 'dmitri@example.com',
+      noop: e => { if (e && e.preventDefault) e.preventDefault(); },
+      isDesk: v === 'desk', isAlerts: v === 'alerts', isWatch: v === 'watch', isMarket: v === 'market',
+      isCalc: v === 'calc', isNotif: v === 'notif', isAdmin: v === 'admin', isStates: v === 'states',
+      goDesk: this.go('desk'), goAlerts: this.go('alerts'), goWatch: this.go('watch'),
+      goMarket: this.go('market'), goCalc: this.go('calc'), goNotif: this.go('notif'),
+      goAdmin: this.go('admin'), goStates: this.go('states'),
+      goStatesPending: this.go('states'),
+
+      leadHeadline: nearCount === 0 ? 'Nothing within ' + thr + '% of a target' : nearCount === 1 ? 'One alert is within ' + thr + '% of firing' : nearCount + ' alerts are within ' + thr + '% of firing',
+      leadStandfirst: leadTop ? leadTop.symbol + ' sits ' + leadTop.distText.replace('−', '') + ' from its ' + leadTop.conditionText + ' ' + leadTop.targetText + ' level — the nearest of ' + risks.length + ' alerts on the desk.' : 'No priced alerts yet.',
+      nearRows,
+      moverCards: movers.slice(0, 4),
+      moverRows: movers,
+      riskRows: risks,
+      sectorRows,
+      sectorSummary: classified + ' of ' + stocks.length + ' equities classified.',
+      activeCount: ALERTS.filter(a => a.armed).length,
+      symbolCount: WATCH.length,
+      fires: [
+        { when: 'Today 14:02', symbol: 'EUR/USD', what: 'crossed above 1.1750', tg: 'Telegram ✓', push: 'Push ✓' },
+        { when: 'Today 09:31', symbol: 'NVDA', what: '% change reached 5.00%', tg: 'Telegram ✓', push: 'Push —' },
+        { when: 'Yesterday 21:14', symbol: 'XOM', what: 'crossed below 110.00', tg: 'Telegram ✓', push: 'Push ✓' }
+      ],
+
+      alertFilters: ['All', 'Armed', 'Fired', 'Recurring'].map(f => ({
+        label: f, cls: s.filter === f ? 'btn btn-primary' : 'btn btn-secondary', set: () => this.setState({ filter: f })
+      })),
+      alertRows, alertsEmpty: alertRows.length === 0,
+
+      watchRows: WATCH.map(w => ({
+        symbol: w.symbol, type: w.type,
+        lastText: this.fmt(w.symbol, w.price),
+        pctText: this.pctText(w.pct), up: w.pct > 0, down: w.pct <= 0,
+        alertText: String(ALERTS.filter(a => a.symbol === w.symbol).length || '—'),
+        openChart: () => this.setState({ modal: 'chart', chartSym: w.symbol, iv: '1day' }),
+        addAlert: () => this.setState({ modal: 'alert', editId: null, form: { symbol: w.symbol, type: w.type, condition: 'cross_above', target: '', ref: '', interval: 1, recurring: false } }),
+        remove: () => this.flash(w.symbol + ' removed from watchlist')
+      })),
+      wForex: s.wType === 'forex', wStock: s.wType === 'stock',
+      setWForex: () => this.setState({ wType: 'forex' }),
+      setWStock: () => this.setState({ wType: 'stock' }),
+      wPlaceholder: s.wType === 'forex' ? 'EUR/USD' : 'AAPL',
+      wSymbol: s.wSymbol,
+      setWSymbol: e => this.setState({ wSymbol: e.target.value }),
+      addWatch: () => { if (!s.wSymbol.trim()) return this.flash('Enter a symbol first'); this.flash(s.wSymbol.toUpperCase() + ' added'); this.setState({ wSymbol: '' }); },
+
+      calc: s.calc,
+      setCalcSymbol: e => {
+        const val = e.target.value;
+        const hit = WATCH.find(w => w.symbol.toUpperCase() === val.trim().toUpperCase());
+        this.setState({ calc: Object.assign({}, s.calc, { symbol: val, buy: hit ? String(hit.price) : s.calc.buy }) });
+      },
+      setCalcShares: e => this.setState({ calc: Object.assign({}, s.calc, { shares: e.target.value }) }),
+      setCalcAvg: e => this.setState({ calc: Object.assign({}, s.calc, { avg: e.target.value }) }),
+      setCalcTarget: e => this.setState({ calc: Object.assign({}, s.calc, { target: e.target.value }) }),
+      setCalcBuy: e => this.setState({ calc: Object.assign({}, s.calc, { buy: e.target.value }) }),
+      resetCalc: () => this.setState({ calc: { symbol: '', shares: '', avg: '', target: '', buy: '' }, result: null }),
+      runCalc: () => {
+        const shares = num('shares'), avg = num('avg'), target = num('target'), buy = num('buy');
+        if ([shares, avg, target, buy].some(x => x == null)) return this.setState({ result: { ok: false, reason: 'Fill in shares owned, current average, target average and a hypothetical buy price.' } });
+        if (shares < 0 || avg <= 0 || target <= 0 || buy <= 0) return this.setState({ result: { ok: false, reason: 'Every figure must be positive.' } });
+        if (shares === 0) return this.setState({ result: { ok: false, reason: 'With no shares owned the blended average simply equals the buy price — there is nothing to average down.' } });
+        const denom = target - buy;
+        if (Math.abs(denom) < 1e-9) return this.setState({ result: { ok: false, reason: 'The buy price equals the target average, so no quantity moves the average onto it.' } });
+        const n = (shares * (avg - target)) / denom;
+        if (n < 0 || !isFinite(n)) return this.setState({ result: { ok: false, reason: 'Buying at this price moves the average the wrong way. Pick a buy price on the other side of the target.' } });
+        this.setState({ result: { ok: true, n, shares, avg, target, buy } });
+      },
+      calcIdle: !r, calcOk: !!(r && r.ok), calcBad: !!(r && !r.ok),
+      calcReason: r && !r.ok ? r.reason : '',
+      calcShares: r && r.ok ? (r.n >= 100 ? Math.round(r.n).toLocaleString() : r.n.toFixed(2)) : '',
+      calcSentence: r && r.ok ? 'shares at ' + r.buy.toFixed(2) + ' brings ' + r.shares.toLocaleString() + ' shares at ' + r.avg.toFixed(2) + ' down to an average of ' + r.target.toFixed(2) + '.' : '',
+      calcLines: r && r.ok ? [
+        { k: 'Position after the buy', v: (r.shares + r.n).toFixed(2) + ' shares' },
+        { k: 'Additional capital', v: (r.n * r.buy).toLocaleString(undefined, { maximumFractionDigits: 0 }) },
+        { k: 'Total cost basis', v: (r.shares * r.avg + r.n * r.buy).toLocaleString(undefined, { maximumFractionDigits: 0 }) },
+        { k: 'Average cost moved', v: r.avg.toFixed(2) + ' → ' + r.target.toFixed(2) }
+      ] : [],
+
+      soundLabel: s.sound ? 'On' : 'Off',
+      soundToggleText: s.sound ? 'Turn the chime off' : 'Turn the chime on',
+      toggleSound: () => { this.setState({ sound: !s.sound }); this.flash(s.sound ? 'Chime off' : 'Chime on'); },
+      testSound: () => {
+        try {
+          const A = window.AudioContext || window.webkitAudioContext;
+          const ctx = new A();
+          [[880, 0], [1320, 0.16]].forEach(([f, t]) => {
+            const o = ctx.createOscillator(), g = ctx.createGain();
+            o.frequency.value = f; o.type = 'triangle';
+            g.gain.setValueAtTime(0.0001, ctx.currentTime + t);
+            g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + t + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 0.15);
+            o.connect(g); g.connect(ctx.destination);
+            o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.18);
+          });
+        } catch (e) { /* audio blocked */ }
+        this.flash('Chime played');
+      },
+
+      pendingCount: 2, pendingEmpty: false,
+      pendingRows: [
+        { email: 'lena@northfield.io', when: '28 Aug, 08:12', approve: () => this.flash('lena@northfield.io approved'), approveAdmin: () => this.flash('lena@northfield.io approved as admin'), reject: () => this.flash('lena@northfield.io rejected') },
+        { email: 'r.okafor@gmail.com', when: '27 Aug, 19:40', approve: () => this.flash('r.okafor@gmail.com approved'), approveAdmin: () => this.flash('r.okafor@gmail.com approved as admin'), reject: () => this.flash('r.okafor@gmail.com rejected') }
+      ],
+      userRows: [
+        { email: 'dmitri@example.com', role: 'Admin', alerts: 9, channels: 'Telegram, push', seen: 'now' },
+        { email: 'sofia@example.com', role: 'Approved', alerts: 4, channels: 'Telegram', seen: '2h ago' },
+        { email: 'marcus@example.com', role: 'Approved', alerts: 0, channels: '—', seen: 'yesterday' },
+        { email: 'lena@northfield.io', role: 'Pending', alerts: 0, channels: '—', seen: '08:12' }
+      ],
+
+      modalAlert: s.modal === 'alert', modalChart: s.modal === 'chart',
+      closeModal: () => this.setState({ modal: null }),
+      modalTitle: s.editId ? 'Edit alert' : 'New alert',
+      fSaveLabel: s.editId ? 'Save changes' : 'Create alert',
+      openNew: () => this.setState({ modal: 'alert', editId: null, form: { symbol: '', type: 'forex', condition: 'cross_above', target: '', ref: '', interval: 1, recurring: false } }),
+      form: s.form,
+      fForex: s.form.type === 'forex', fStock: s.form.type === 'stock',
+      setFForex: () => this.setState({ form: Object.assign({}, s.form, { type: 'forex' }) }),
+      setFStock: () => this.setState({ form: Object.assign({}, s.form, { type: 'stock' }) }),
+      fPlaceholder: s.form.type === 'forex' ? 'EUR/USD' : 'AAPL',
+      setFSymbol: e => this.setState({ form: Object.assign({}, s.form, { symbol: e.target.value }) }),
+      setFCondition: e => this.setState({ form: Object.assign({}, s.form, { condition: e.target.value }) }),
+      setFTarget: e => this.setState({ form: Object.assign({}, s.form, { target: e.target.value }) }),
+      setFRef: e => this.setState({ form: Object.assign({}, s.form, { ref: e.target.value }) }),
+      setFInterval: e => this.setState({ form: Object.assign({}, s.form, { interval: Number(e.target.value) }) }),
+      toggleRecurring: () => this.setState({ form: Object.assign({}, s.form, { recurring: !s.form.recurring }) }),
+      fIsPct: s.form.condition === 'pct_change',
+      fTargetLabel: s.form.condition === 'pct_change' ? 'Change in percent' : 'Target price',
+      fIntervalLabel: s.form.interval === 1 ? 'every minute' : 'every ' + s.form.interval + ' minutes',
+      fSummary: (s.form.symbol || 'This symbol') + ' will be checked ' + (s.form.interval === 1 ? 'every minute' : 'every ' + s.form.interval + ' minutes') + '; ' + (s.form.recurring ? 'the alert re-arms after each crossing.' : 'the alert deactivates after it fires once.'),
+      saveAlert: () => {
+        if (!s.form.symbol.trim() || s.form.target === '') return this.flash('A symbol and a target are required');
+        this.setState({ modal: null });
+        this.flash(s.editId ? 'Alert updated' : 'Alert on ' + s.form.symbol.toUpperCase() + ' created');
+      },
+
+      chartSymbol: cs || '', chartLast: chart.last, chartPath: chart.path, chartArea: chart.area,
+      chartFrom: chart.from, chartTo: chart.to, chartRange: chart.range, chartTargets: chart.targets,
+      ivDay: s.iv === '1day', ivWeek: s.iv === '1week', ivHour: s.iv === '1h',
+      setIvDay: () => this.setState({ iv: '1day' }),
+      setIvWeek: () => this.setState({ iv: '1week' }),
+      setIvHour: () => this.setState({ iv: '1h' }),
+
+      toast: !!s.toast, toastText: s.toast || ''
+    });
+  }
+}
+
+</script>
+</body>
+</html>
